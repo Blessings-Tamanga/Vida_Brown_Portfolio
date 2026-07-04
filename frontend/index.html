@@ -12,82 +12,83 @@
 <body>
     <!-- Header -->
     <header class="site-header">
-        <div class="logo">VIDA BROWN</div>
+        <div class="logo" id="site-logo">VIDA BROWN</div>
         <nav class="main-nav">
-            <a href="#" class="active">Home</a>
-            <a href="#">Shows</a>
-            <a href="#">Gallery</a>
-            <a href="#">Music</a>
-            <a href="#">Products</a>
-            <a href="#">Contact</a>
+            <a href="#" class="active" data-page="home">Home</a>
+            <a href="#shows" data-page="shows">Shows</a>
+            <a href="#gallery" data-page="gallery">Gallery</a>
+            <a href="#music" data-page="music">Music</a>
+            <a href="#products" data-page="products">Products</a>
+            <a href="#contact" data-page="contact">Contact</a>
         </nav>
         <div class="header-actions">
             <button id="themeToggle" class="theme-toggle" title="Toggle theme">
                 <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
             </button>
-            <button class="btn btn-primary">Connect</button>
+            <button class="btn btn-primary" id="connectBtn">Connect</button>
         </div>
     </header>
 
     <main>
         <!-- Hero Section -->
-        <section class="hero">
+        <section class="hero" id="hero-section">
             <div class="glow glow-hero-1"></div>
             <div class="glow glow-hero-2"></div>
             <div class="container hero-container">
-                <div class="hero-content">
-                    <h1>Vida Brown</h1>
-                    <h2>Singer • Songwriter • Producer</h2>
-                    <p>Born Vida Ezra Gérmaño, known as Vida (Veeda) - a Malawian artist creating music, arts, and culture content. Reviewing African music and bringing you the hottest Afrobeats reactions and discussions.</p>
+                <div class="hero-content" id="hero-content">
+                    <h1 id="artist-name">Vida Brown</h1>
+                    <h2 id="artist-title">Singer • Songwriter • Producer</h2>
+                    <p id="artist-bio">Born Vida Ezra Gérmaño, known as Vida (Veeda) - a Malawian artist creating music, arts, and culture content. Reviewing African music and bringing you the hottest Afrobeats reactions and discussions.</p>
                     <div class="hero-buttons">
-                        <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" class="btn btn-primary">
+                        <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" class="btn btn-primary" id="spotify-btn">
                             <span class="material-symbols-outlined">music_note</span> Listen on Spotify
                         </a>
-                        <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" class="btn btn-outline">
+                        <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" class="btn btn-outline" id="youtube-btn">
                             <span class="material-symbols-outlined">subscriptions</span> YouTube Channel
                         </a>
                     </div>
                 </div>
                 <div class="hero-image">
                     <div class="hero-image-wrapper">
-                        <img alt="Vida Brown Portrait" src="https://lh3.googleusercontent.com/aida/AP1WRLsukv6fS6bwdPG-3rD-ChGqsFBdsxKrorZyoj1-qvH-7N4c3R8XKgzb1fcAwM7PypB9w072T0p4_WFKaOZeT1T5jRhQLcPdmLHOsGo283_zhnlYzGrJGKFaQNHR6Ki3KOdxJBw3sN_QNq1ijoXpymCiCGKfw0cOkl6hqAk0MdwwQ6-sTHC27DZxbxj52_PfY7xiwI34fm0RypyikLs5XPirBlShCmpYMbNAtMt86PTCHcM6eDs2wHsd" />
+                        <img id="artist-image" alt="Vida Brown Portrait" src="https://lh3.googleusercontent.com/aida/AP1WRLsukv6fS6bwdPG-3rD-ChGqsFBdsxKrorZyoj1-qvH-7N4c3R8XKgzb1fcAwM7PypB9w072T0p4_WFKaOZeT1T5jRhQLcPdmLHOsGo283_zhnlYzGrJGKFaQNHR6Ki3KOdxJBw3sN_QNq1ijoXpymCiCGKfw0cOkl6hqAk0MdwwQ6-sTHC27DZxbxj52_PfY7xiwI34fm0RypyikLs5XPirBlShCmpYMbNAtMt86PTCHcM6eDs2wHsd" />
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Trending Now Section -->
-        <section class="section">
+        <section class="section" id="trending-section">
             <div class="container">
                 <div class="section-header">
                     <div>
                         <span class="section-tag">Newest Release</span>
-                        <h2>Trending Now</h2>
+                        <h2 id="trending-title">Trending Now</h2>
                     </div>
-                    <a class="view-all" href="https://www.youtube.com/@VidaBrownOfficial" target="_blank">VIEW ALL VIDEOS <span class="material-symbols-outlined">arrow_forward</span></a>
+                    <a class="view-all" href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" id="trending-view-all">VIEW ALL VIDEOS <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
 
-                <div class="glass-card featured-video">
+                <div class="glass-card featured-video" id="featured-video">
                     <div class="video-wrapper">
-                        <iframe src="https://www.youtube.com/embed/nWA4D9U-q48" title="Diamond Platnumz - Happy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        <iframe id="featured-video-iframe" src="https://www.youtube.com/embed/nWA4D9U-q48" title="Diamond Platnumz - Happy" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                     </div>
                     <div class="video-info">
-                        <div class="badges">
+                        <div class="badges" id="featured-video-badges">
                             <span class="badge badge-secondary">HIT OR MISS</span>
                             <span class="badge badge-outline">2026</span>
                         </div>
-                        <h3>Diamond Platnumz - Happy</h3>
-                        <p>VIDEO REVIEW | HIT OR MISS - Breaking down the latest banger from Diamond Platnumz. Is it a hit or a miss? Watch the full review and join the conversation.</p>
-                        <div class="video-stats">
-                            <span><span class="material-symbols-outlined">visibility</span> 10.7K views</span>
-                            <span><span class="material-symbols-outlined">thumb_up</span> 330 likes</span>
-                            <span><span class="material-symbols-outlined">schedule</span> 5:26</span>
+                        <h3 id="featured-video-title">Diamond Platnumz - Happy</h3>
+                        <p id="featured-video-description">VIDEO REVIEW | HIT OR MISS - Breaking down the latest banger from Diamond Platnumz. Is it a hit or a miss? Watch the full review and join the conversation.</p>
+                        <div class="video-stats" id="featured-video-stats">
+                            <span><span class="material-symbols-outlined">visibility</span> <span id="featured-views">10.7K</span> views</span>
+                            <span><span class="material-symbols-outlined">thumb_up</span> <span id="featured-likes">330</span> likes</span>
+                            <span><span class="material-symbols-outlined">schedule</span> <span id="featured-duration">5:26</span></span>
                         </div>
                     </div>
                 </div>
 
-                <div class="video-grid">
-                    <div class="glass-card video-card">
+                <div class="video-grid" id="trending-grid">
+                    <!-- Video cards will be dynamically loaded here -->
+                    <div class="glass-card video-card" data-video-id="1">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/JqEXp4EJjlw" title="Adekunle Gold" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-primary">HIT OR MISS</span><span class="meta-time">• 5:06</span></div>
@@ -96,7 +97,7 @@
                             <div class="video-stats"><span>210 views</span><span>•</span><span>Feb 2026</span></div>
                         </div>
                     </div>
-                    <div class="glass-card video-card">
+                    <div class="glass-card video-card" data-video-id="2">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/UujBzYu6z0E" title="AYRA STARR" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-secondary">REACTION</span><span class="meta-time">• 5:03</span></div>
@@ -105,7 +106,7 @@
                             <div class="video-stats"><span>4.6K views</span><span>•</span><span>Feb 2025</span></div>
                         </div>
                     </div>
-                    <div class="glass-card video-card">
+                    <div class="glass-card video-card" data-video-id="3">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/jTIutFxYl3k" title="REMA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-tertiary">REACTION</span><span class="meta-time">• 5:07</span></div>
@@ -119,18 +120,18 @@
         </section>
 
         <!-- YouTube Shows Section -->
-        <section class="section bg-surface">
+        <section class="section bg-surface" id="shows-section">
             <div class="container">
                 <div class="section-header">
                     <div>
                         <span class="section-tag">YouTube Series</span>
-                        <h2>Latest Shows</h2>
-                        <p style="margin-top: 16px; max-width: 600px;">Watch the latest episodes of HIT OR MISS, music reviews, and reactions on the official Vida Brown YouTube channel.</p>
+                        <h2 id="shows-title">Latest Shows</h2>
+                        <p style="margin-top: 16px; max-width: 600px;" id="shows-description">Watch the latest episodes of HIT OR MISS, music reviews, and reactions on the official Vida Brown YouTube channel.</p>
                     </div>
-                    <a class="view-all" href="https://www.youtube.com/@VidaBrownOfficial" target="_blank">VIEW ALL ON YOUTUBE <span class="material-symbols-outlined">arrow_forward</span></a>
+                    <a class="view-all" href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" id="shows-view-all">VIEW ALL ON YOUTUBE <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
 
-                <div class="glass-card featured-video">
+                <div class="glass-card featured-video" id="shows-featured-video">
                     <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/4Ykm5R1enpQ" title="ONESIMUS" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
                     <div class="video-info">
                         <div class="badges">
@@ -138,7 +139,7 @@
                             <span style="font-size:14px;color:var(--text-secondary);">Uploaded April 2024</span>
                         </div>
                         <h3>ONESIMUS - CONTROLLER | VIDEO REVIEW | MALAWI MUSIC</h3>
-                        <p>This Week SMASH 👍🔋OR PASS👎🪫 - Looking at Onesimus - Controller. A deep dive into Malawian music and the rising talent from the region.</p>
+                        <p>This Week SMASH 👍🔋OR PASS🪫 - Looking at Onesimus - Controller. A deep dive into Malawian music and the rising talent from the region.</p>
                         <div class="video-stats">
                             <span><span class="material-symbols-outlined">visibility</span> 29.1K views</span>
                             <span><span class="material-symbols-outlined">thumb_up</span> 1K likes</span>
@@ -147,8 +148,9 @@
                     </div>
                 </div>
 
-                <div class="video-grid">
-                    <div class="glass-card video-card">
+                <div class="video-grid" id="shows-grid">
+                    <!-- Show cards will be dynamically loaded here -->
+                    <div class="glass-card video-card" data-show-id="1">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/nWA4D9U-q48" title="Diamond Platnumz" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-primary">HIT OR MISS</span><span class="meta-time">• 5:26</span></div>
@@ -157,7 +159,7 @@
                             <div class="video-stats"><span>10.7K views</span><span>•</span><span>Mar 2026</span></div>
                         </div>
                     </div>
-                    <div class="glass-card video-card">
+                    <div class="glass-card video-card" data-show-id="2">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/JqEXp4EJjlw" title="Adekunle Gold" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-secondary">HIT OR MISS</span><span class="meta-time">• 5:06</span></div>
@@ -166,7 +168,7 @@
                             <div class="video-stats"><span>210 views</span><span>•</span><span>Feb 2026</span></div>
                         </div>
                     </div>
-                    <div class="glass-card video-card">
+                    <div class="glass-card video-card" data-show-id="3">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/UujBzYu6z0E" title="AYRA STARR" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-tertiary">REACTION</span><span class="meta-time">• 5:03</span></div>
@@ -175,7 +177,7 @@
                             <div class="video-stats"><span>4.6K views</span><span>•</span><span>Feb 2025</span></div>
                         </div>
                     </div>
-                    <div class="glass-card video-card">
+                    <div class="glass-card video-card" data-show-id="4">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/jTIutFxYl3k" title="REMA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-primary">REACTION</span><span class="meta-time">• 5:07</span></div>
@@ -184,7 +186,7 @@
                             <div class="video-stats"><span>7.8K views</span><span>•</span><span>Feb 2025</span></div>
                         </div>
                     </div>
-                    <div class="glass-card video-card">
+                    <div class="glass-card video-card" data-show-id="5">
                         <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/4Ykm5R1enpQ" title="ONESIMUS" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
                         <div class="video-card-info">
                             <div class="badges"><span class="badge badge-secondary">MALAWI MUSIC</span><span class="meta-time">• 5:12</span></div>
@@ -193,7 +195,7 @@
                             <div class="video-stats"><span>29.1K views</span><span>•</span><span>Apr 2024</span></div>
                         </div>
                     </div>
-                    <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" class="glass-card video-card subscribe-card">
+                    <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" class="glass-card video-card subscribe-card" id="subscribe-card">
                         <div class="subscribe-icon"><span class="material-symbols-outlined">subscriptions</span></div>
                         <h4>Subscribe to Channel</h4>
                         <p>Get the latest music reviews and reactions</p>
@@ -204,16 +206,17 @@
         </section>
 
         <!-- Gallery Section -->
-        <section class="section">
+        <section class="section" id="gallery-section">
             <div class="container">
                 <div class="section-header">
                     <div>
                         <span class="section-tag">Visuals</span>
-                        <h2>Gallery</h2>
+                        <h2 id="gallery-title">Gallery</h2>
                     </div>
-                    <a class="view-all" href="#">VIEW ALL PHOTOS <span class="material-symbols-outlined">arrow_forward</span></a>
+                    <a class="view-all" href="#" id="gallery-view-all">VIEW ALL PHOTOS <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
-                <div class="gallery-grid">
+                <div class="gallery-grid" id="gallery-grid">
+                    <!-- Gallery images will be dynamically loaded here -->
                     <div class="item"><img src="screen.png" alt="Gallery Image"></div>
                     <div class="item"><img src="screen1.png" alt="Gallery Image"></div>
                     <div class="item"><img src="ll.png" alt="Gallery Image"></div>
@@ -224,15 +227,15 @@
         </section>
 
         <!-- Music Section -->
-        <section class="section bg-surface">
+        <section class="section bg-surface" id="music-section">
             <div class="container">
                 <div class="section-header">
                     <div>
                         <span class="section-tag">Discography</span>
-                        <h2>Listen on Spotify</h2>
-                        <p style="margin-top: 16px; max-width: 600px;">Stream Vida Brown's original music including Umbrella, PON ME (Everything), LONELY, SAY IT, and more.</p>
+                        <h2 id="music-title">Listen on Spotify</h2>
+                        <p style="margin-top: 16px; max-width: 600px;" id="music-description">Stream Vida Brown's original music including Umbrella, PON ME (Everything), LONELY, SAY IT, and more.</p>
                     </div>
-                    <a class="view-all" href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank">OPEN IN SPOTIFY <span class="material-symbols-outlined">arrow_forward</span></a>
+                    <a class="view-all" href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" id="spotify-view-all">OPEN IN SPOTIFY <span class="material-symbols-outlined">arrow_forward</span></a>
                 </div>
 
                 <div class="glass-card" style="padding: 48px;">
@@ -241,34 +244,131 @@
                             <div class="spotify-wrapper">
                                 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/artist/3ihbWDeubJO4XmeZlCGqZL?utm_source=generator&theme=0" width="100%" height="100%" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
                             </div>
-                            <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" class="btn btn-spotify" style="margin-top:32px;">
+                            <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" class="btn btn-spotify" style="margin-top:32px;" id="follow-spotify-btn">
                                 <span class="material-symbols-outlined">music_note</span> Follow on Spotify
                             </a>
                         </div>
 
                         <div>
-                            <div class="music-header">
+                            <div class="music-header" id="music-header">
                                 <div>
-                                    <h3>Vida Brown</h3>
-                                    <p style="color:var(--text-secondary);">Singer • Songwriter • Producer</p>
-                                    <p style="color:var(--text-secondary);font-size:14px;margin-top:8px;">Malawian Artist • 82 Followers</p>
+                                    <h3 id="music-artist-name">Vida Brown</h3>
+                                    <p id="music-artist-title" style="color:var(--text-secondary);">Singer • Songwriter • Producer</p>
+                                    <p id="music-artist-stats" style="color:var(--text-secondary);font-size:14px;margin-top:8px;">Malawian Artist • <span id="follower-count">82</span> Followers</p>
                                 </div>
                                 <div class="music-actions">
-                                    <button class="icon-btn"><span class="material-symbols-outlined">favorite</span></button>
-                                    <button class="icon-btn"><span class="material-symbols-outlined">playlist_add</span></button>
-                                    <button class="icon-btn"><span class="material-symbols-outlined">share</span></button>
+                                    <button class="icon-btn" id="favorite-all-btn" title="Favorite All"><span class="material-symbols-outlined">favorite</span></button>
+                                    <button class="icon-btn" id="playlist-add-btn" title="Add to Playlist"><span class="material-symbols-outlined">playlist_add</span></button>
+                                    <button class="icon-btn" id="share-music-btn" title="Share"><span class="material-symbols-outlined">share</span></button>
                                 </div>
                             </div>
 
-                            <div class="track-list">
-                                <div class="track-item"><div class="track-info"><span class="track-num">01</span><div><div class="track-title">PON ME (Everything), Pt. 2</div><div class="track-artist">Vida Brown</div></div></div><div class="track-meta"><span>3K streams</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">02</span><div><div class="track-title">SAY IT</div><div class="track-artist">Vida Brown</div></div></div><div class="track-meta"><span>3.8K streams</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">03</span><div><div class="track-title">PON ME (Everything)</div><div class="track-artist">Vida Brown</div></div></div><div class="track-meta"><span>1.8K streams</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">04</span><div><div class="track-title">LONELY</div><div class="track-artist">Vida Brown • 2022</div></div></div><div class="track-meta"><span>Single</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">05</span><div><div class="track-title">QUEEN</div><div class="track-artist">Vida Brown</div></div></div><div class="track-meta"><span>Single</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">06</span><div><div class="track-title">Umbrella</div><div class="track-artist">Vida Brown • 2024</div></div></div><div class="track-meta"><span>Album</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">07</span><div><div class="track-title">EAZY ON</div><div class="track-artist">Vida Brown</div></div></div><div class="track-meta"><span>Single</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
-                                <div class="track-item"><div class="track-info"><span class="track-num">08</span><div><div class="track-title">I Don't Wanna Know</div><div class="track-artist">Vida Brown feat. Kinglabeatz • 2024</div></div></div><div class="track-meta"><span>Single</span><button class="track-more"><span class="material-symbols-outlined">more_horiz</span></button></div></div>
+                            <div class="track-list" id="track-list">
+                                <!-- Tracks will be dynamically loaded here -->
+                                <div class="track-item" data-track-id="1">
+                                    <div class="track-info">
+                                        <span class="track-num">01</span>
+                                        <div>
+                                            <div class="track-title">PON ME (Everything), Pt. 2</div>
+                                            <div class="track-artist">Vida Brown</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span><span id="track-1-streams">3K</span> streams</span>
+                                        <button class="track-more" data-track-id="1"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="2">
+                                    <div class="track-info">
+                                        <span class="track-num">02</span>
+                                        <div>
+                                            <div class="track-title">SAY IT</div>
+                                            <div class="track-artist">Vida Brown</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span><span id="track-2-streams">3.8K</span> streams</span>
+                                        <button class="track-more" data-track-id="2"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="3">
+                                    <div class="track-info">
+                                        <span class="track-num">03</span>
+                                        <div>
+                                            <div class="track-title">PON ME (Everything)</div>
+                                            <div class="track-artist">Vida Brown</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span><span id="track-3-streams">1.8K</span> streams</span>
+                                        <button class="track-more" data-track-id="3"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="4">
+                                    <div class="track-info">
+                                        <span class="track-num">04</span>
+                                        <div>
+                                            <div class="track-title">LONELY</div>
+                                            <div class="track-artist">Vida Brown • 2022</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span>Single</span>
+                                        <button class="track-more" data-track-id="4"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="5">
+                                    <div class="track-info">
+                                        <span class="track-num">05</span>
+                                        <div>
+                                            <div class="track-title">QUEEN</div>
+                                            <div class="track-artist">Vida Brown</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span>Single</span>
+                                        <button class="track-more" data-track-id="5"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="6">
+                                    <div class="track-info">
+                                        <span class="track-num">06</span>
+                                        <div>
+                                            <div class="track-title">Umbrella</div>
+                                            <div class="track-artist">Vida Brown • 2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span>Album</span>
+                                        <button class="track-more" data-track-id="6"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="7">
+                                    <div class="track-info">
+                                        <span class="track-num">07</span>
+                                        <div>
+                                            <div class="track-title">EAZY ON</div>
+                                            <div class="track-artist">Vida Brown</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span>Single</span>
+                                        <button class="track-more" data-track-id="7"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
+                                <div class="track-item" data-track-id="8">
+                                    <div class="track-info">
+                                        <span class="track-num">08</span>
+                                        <div>
+                                            <div class="track-title">I Don't Wanna Know</div>
+                                            <div class="track-artist">Vida Brown feat. Kinglabeatz • 2024</div>
+                                        </div>
+                                    </div>
+                                    <div class="track-meta">
+                                        <span>Single</span>
+                                        <button class="track-more" data-track-id="8"><span class="material-symbols-outlined">more_horiz</span></button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="social-buttons">
@@ -286,32 +386,39 @@
         </section>
 
         <!-- Products Section -->
-        <section class="section">
+        <section class="section" id="products-section">
             <div class="container">
                 <div class="section-header">
                     <div>
-                        <span class="section-tag">Coming Soon</span>
-                        <h2>Merchandise</h2>
+                        <span class="section-tag" id="products-tag">Coming Soon</span>
+                        <h2 id="products-title">Merchandise</h2>
                     </div>
                 </div>
-                <div class="glass-card" style="padding: 48px; text-align: center;">
+                <div class="glass-card" style="padding: 48px; text-align: center;" id="products-container">
                     <span class="material-symbols-outlined section-icon">shopping_bag</span>
-                    <h3>Merch Store Opening Soon</h3>
-                    <p style="max-width: 600px; margin: 0 auto;">Official Vida Brown merchandise coming soon. Stay tuned for exclusive apparel, accessories, and more.</p>
+                    <h3 id="products-message">Merch Store Opening Soon</h3>
+                    <p style="max-width: 600px; margin: 0 auto;" id="products-description">Official Vida Brown merchandise coming soon. Stay tuned for exclusive apparel, accessories, and more.</p>
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section class="section">
+        <section class="section" id="contact-section">
             <div class="container">
                 <div class="glass-card contact-card">
                     <div class="glow glow-primary"></div>
                     <div class="glow glow-secondary"></div>
                     <div class="contact-content">
                         <span class="section-tag">Stay Connected</span>
-                        <h2>Join the Community</h2>
-                        <p style="max-width: 800px; margin: 0 auto 32px;">Subscribe for the latest music reviews, reactions, and exclusive content from Vida Brown.</p>
+                        <h2 id="contact-title">Join the Community</h2>
+                        <p style="max-width: 800px; margin: 0 auto 32px;" id="contact-description">Subscribe for the latest music reviews, reactions, and exclusive content from Vida Brown.</p>
+                        
+                        <!-- Newsletter Form -->
+                        <form id="newsletter-form" class="newsletter-form" style="display:flex; gap:12px; max-width:500px; margin:0 auto 32px; flex-wrap: wrap; justify-content: center;">
+                            <input type="email" id="newsletter-email" name="email" placeholder="Enter your email address" required style="flex:1; min-width: 200px; padding:12px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.05); color:inherit; outline:none; font-size: 16px;">
+                            <button type="submit" class="btn btn-primary" id="subscribe-btn">Subscribe</button>
+                        </form>
+
                         <div class="hero-buttons" style="justify-content: center;">
                             <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" class="btn btn-youtube">
                                 <span class="material-symbols-outlined">subscriptions</span> Subscribe on YouTube
@@ -329,19 +436,19 @@
     <!-- Footer -->
     <footer class="site-footer">
         <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="logo">VIDA BROWN</div>
-            <p style="opacity:0.8;">© 2024-2026 Vida Ezra Gérmaño. All Rights Reserved.</p>
-            <p style="opacity:0.6;font-size:14px;">Malawian Artist • Music • Arts • Culture</p>
+            <div class="logo" id="footer-logo">VIDA BROWN</div>
+            <p style="opacity:0.8;" id="footer-copyright">© 2024-2026 Vida Ezra Gérmaño. All Rights Reserved.</p>
+            <p style="opacity:0.6;font-size:14px;" id="footer-tagline">Malawian Artist • Music • Arts • Culture</p>
         </div>
         <div class="footer-links">
-            <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank">YouTube</a>
-            <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank">Spotify</a>
-            <a href="https://www.instagram.com/vidabrownofficial" target="_blank">Instagram</a>
-            <a href="https://www.facebook.com/vidabrownofficial" target="_blank">Facebook</a>
+            <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" id="footer-youtube">YouTube</a>
+            <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" id="footer-spotify">Spotify</a>
+            <a href="https://www.instagram.com/vidabrownofficial" target="_blank" id="footer-instagram">Instagram</a>
+            <a href="https://www.facebook.com/vidabrownofficial" target="_blank" id="footer-facebook">Facebook</a>
         </div>
         <div class="footer-socials">
-            <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank"><span class="material-symbols-outlined">subscriptions</span></a>
-            <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank"><span class="material-symbols-outlined">music_note</span></a>
+            <a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" id="social-youtube"><span class="material-symbols-outlined">subscriptions</span></a>
+            <a href="https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL" target="_blank" id="social-spotify"><span class="material-symbols-outlined">music_note</span></a>
         </div>
     </footer>
 
