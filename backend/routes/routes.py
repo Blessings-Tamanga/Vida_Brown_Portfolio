@@ -1,11 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from database.database import get_db
 import crud.crud as crud
 import schemas.schemas as schemas
+import os
 
 router = APIRouter(prefix="/api", tags=["Vida Brown API"])
+
+
+def admin_required(x_admin_token: str = Header(None, alias="X-Admin-Token")):
+    """Simple admin token check. Set ADMIN_TOKEN env var (defaults to 'devtoken')."""
+    expected = os.getenv("ADMIN_TOKEN", "devtoken")
+    if x_admin_token != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return True
 
 # Artist Routes
 @router.get("/artist/profile", response_model=schemas.ArtistResponse)
@@ -103,7 +112,8 @@ async def subscribe_newsletter(
 @router.post("/admin/videos", response_model=schemas.VideoResponse)
 async def create_video(
     video: schemas.VideoCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: bool = Depends(admin_required)
 ):
     """Create a new video (Admin)"""
     return crud.create_video(db, video)
@@ -111,7 +121,8 @@ async def create_video(
 @router.post("/admin/tracks", response_model=schemas.TrackResponse)
 async def create_track(
     track: schemas.TrackCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: bool = Depends(admin_required)
 ):
     """Create a new track (Admin)"""
     return crud.create_track(db, track)
@@ -119,7 +130,68 @@ async def create_track(
 @router.post("/admin/gallery", response_model=schemas.GalleryImageResponse)
 async def create_gallery_image(
     image: schemas.GalleryImageCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    admin: bool = Depends(admin_required)
 ):
     """Add image to gallery (Admin)"""
     return crud.create_gallery_image(db, image)
+
+
+# Admin login - exchange password for token
+@router.post("/admin/login")
+async def admin_login(payload: dict):
+    password = payload.get("password")
+    expected = os.getenv("ADMIN_PASSWORD", "devpass")
+    if password != expected:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = os.getenv("ADMIN_TOKEN", "devtoken")
+    return {"token": token}
+
+
+# Admin update/delete endpoints
+@router.put("/admin/videos/{video_id}", response_model=schemas.VideoResponse)
+async def update_video(video_id: int, video: schemas.VideoCreate, db: Session = Depends(get_db), admin: bool = Depends(admin_required)):
+    updated = crud.update_video(db, video_id, video)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return updated
+
+
+@router.delete("/admin/videos/{video_id}")
+async def delete_video(video_id: int, db: Session = Depends(get_db), admin: bool = Depends(admin_required)):
+    success = crud.delete_video(db, video_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Video not found")
+    return {"message": "deleted"}
+
+
+@router.put("/admin/tracks/{track_id}", response_model=schemas.TrackResponse)
+async def update_track(track_id: int, track: schemas.TrackCreate, db: Session = Depends(get_db), admin: bool = Depends(admin_required)):
+    updated = crud.update_track(db, track_id, track)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Track not found")
+    return updated
+
+
+@router.delete("/admin/tracks/{track_id}")
+async def delete_track(track_id: int, db: Session = Depends(get_db), admin: bool = Depends(admin_required)):
+    success = crud.delete_track(db, track_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Track not found")
+    return {"message": "deleted"}
+
+
+@router.put("/admin/gallery/{image_id}", response_model=schemas.GalleryImageResponse)
+async def update_gallery(image_id: int, image: schemas.GalleryImageCreate, db: Session = Depends(get_db), admin: bool = Depends(admin_required)):
+    updated = crud.update_gallery_image(db, image_id, image)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return updated
+
+
+@router.delete("/admin/gallery/{image_id}")
+async def delete_gallery(image_id: int, db: Session = Depends(get_db), admin: bool = Depends(admin_required)):
+    success = crud.delete_gallery_image(db, image_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return {"message": "deleted"}

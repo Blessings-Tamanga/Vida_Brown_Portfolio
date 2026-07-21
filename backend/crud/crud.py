@@ -55,6 +55,24 @@ def create_video(db: Session, video: schemas.VideoCreate):
     db.refresh(db_video)
     return db_video
 
+def update_video(db: Session, video_id: int, video: schemas.VideoCreate):
+    db_video = db.query(models.Video).filter(models.Video.id == video_id).first()
+    if not db_video:
+        return None
+    for key, value in video.model_dump().items():
+        setattr(db_video, key, value)
+    db.commit()
+    db.refresh(db_video)
+    return db_video
+
+def delete_video(db: Session, video_id: int):
+    db_video = db.query(models.Video).filter(models.Video.id == video_id).first()
+    if not db_video:
+        return False
+    db.delete(db_video)
+    db.commit()
+    return True
+
 def update_video_views(db: Session, video_id: int):
     video = db.query(models.Video).filter(models.Video.id == video_id).first()
     if video:
@@ -76,6 +94,24 @@ def create_gallery_image(db: Session, image: schemas.GalleryImageCreate):
     db.refresh(db_image)
     return db_image
 
+def update_gallery_image(db: Session, image_id: int, image: schemas.GalleryImageCreate):
+    db_image = db.query(models.GalleryImage).filter(models.GalleryImage.id == image_id).first()
+    if not db_image:
+        return None
+    for key, value in image.model_dump().items():
+        setattr(db_image, key, value)
+    db.commit()
+    db.refresh(db_image)
+    return db_image
+
+def delete_gallery_image(db: Session, image_id: int):
+    db_image = db.query(models.GalleryImage).filter(models.GalleryImage.id == image_id).first()
+    if not db_image:
+        return False
+    db.delete(db_image)
+    db.commit()
+    return True
+
 # Product CRUD
 def get_products(db: Session, skip: int = 0, limit: int = 100, available_only: bool = False):
     query = db.query(models.Product)
@@ -89,6 +125,25 @@ def create_product(db: Session, product: schemas.ProductCreate):
     db.commit()
     db.refresh(db_product)
     return db_product
+
+# Track update/delete
+def update_track(db: Session, track_id: int, track: schemas.TrackCreate):
+    db_track = db.query(models.Track).filter(models.Track.id == track_id).first()
+    if not db_track:
+        return None
+    for key, value in track.model_dump().items():
+        setattr(db_track, key, value)
+    db.commit()
+    db.refresh(db_track)
+    return db_track
+
+def delete_track(db: Session, track_id: int):
+    db_track = db.query(models.Track).filter(models.Track.id == track_id).first()
+    if not db_track:
+        return False
+    db.delete(db_track)
+    db.commit()
+    return True
 
 # Newsletter CRUD
 def create_subscriber(db: Session, email: str):

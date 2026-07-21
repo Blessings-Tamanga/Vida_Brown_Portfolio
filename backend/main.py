@@ -1,278 +1,236 @@
+from datetime import datetime, timedelta
+from pathlib import Path
+
+import requests
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-import os
-import requests
-from datetime import datetime, timedelta
-import re
+from fastapi.staticfiles import StaticFiles
+from fastapi import Request
+import logging
 
-# Load environment variables
+from database.database import Base, SessionLocal, engine
+from models import models
+from routes.routes import router
+
 load_dotenv()
 
 app = FastAPI(
     title="Vida Brown API",
-    description="YouTube & Spotify Integration",
-    version="1.0.0"
+    description="Backend for the Vida Brown portfolio and admin dashboard",
+    version="1.0.0",
 )
 
-# CORS Configuration
+# Basic logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("vidabrown")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Get API keys from environment
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+app.include_router(router)
 
-# Cache storage
-cache = {}
-CACHE_DURATION = 300  # 5 minutes
+ROOT_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIR = ROOT_DIR / "frontend"
+app.mount("/assets", StaticFiles(directory=FRONTEND_DIR / "assets"), name="assets")
 
-# ============== HELPER FUNCTIONS ==============
+cache: dict[str, tuple[object, datetime]] = {}
 
-def get_cached(key):
-    """Get data from cache if not expired"""
-    if key in cache:
-        data, timestamp = cache[key]
-        if datetime.now() - timestamp < timedelta(seconds=CACHE_DURATION):
-            return data
-    return None
+CACHE_DURATION_SECONDS = 300
 
-def set_cache(key, data):
-    """Set data in cache with timestamp"""
-    cache[key] = (data, datetime.now())
 
-def format_number(num):
-    """Format number to K, M format"""
-    if num >= 1000000:
-        return f"{num/1000000:.1f}M"
-    elif num >= 1000:
-        return f"{num/1000:.1f}K"
-    return str(num)
+def seed_database() -> None:
+    db = SessionLocal()
+    try:
+        artist = db.query(models.Artist).first()
+        if not artist:
+            artist = models.Artist(
+                name="Vida Brown",
+                title="Singer • Songwriter • Producer",
+                bio="Born Vida Ezra Gérmaño, known as Vida (Veeda) - a Malawian artist creating music, arts, and culture content.",
+                followers=82,
+            )
+            db.add(artist)
+            db.flush()
 
-def parse_iso_duration(duration):
-    """Parse ISO 8601 duration to MM:SS format"""
-    pattern = re.compile(r'P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?')
-    match = pattern.match(duration)
-    
-    if match:
-        years, months, days, hours, minutes, seconds = match.groups()
-        hours = int(hours or 0)
-        minutes = int(minutes or 0)
-        seconds = int(seconds or 0)
-        
-        total_minutes = hours * 60 + minutes
-        
-        if total_minutes > 0:
-            return f"{total_minutes}:{seconds:02d}"
-        return f"0:{seconds:02d}"
-    
-    return "0:00"
+        if not db.query(models.Video).first():
+            db.add_all(
+                [
+                    models.Video(
+                        title="Diamond Platnumz - Happy",
+                        youtube_id="nWA4D9U-q48",
+                        embed_url="https://www.youtube.com/embed/nWA4D9U-q48",
+                        category="HIT OR MISS",
+                        views="10.7K",
+                        likes="330",
+                        duration="5:26",
+                        upload_date="Mar 2026",
+                        description="VIDEO REVIEW | HIT OR MISS - Breaking down the latest banger from Diamond Platnumz.",
+                        is_featured=True,
+                    ),
+                    models.Video(
+                        title="Adekunle Gold ft Davido - Only God Can Save Me",
+                        youtube_id="JqEXp4EJjlw",
+                        embed_url="https://www.youtube.com/embed/JqEXp4EJjlw",
+                        category="HIT OR MISS",
+                        views="210",
+                        likes="48",
+                        duration="5:06",
+                        upload_date="Feb 2026",
+                        description="Reviewing the collaboration between two Nigerian powerhouses.",
+                    ),
+                    models.Video(
+                        title="AYRA STARR - ALL THE LOVE",
+                        youtube_id="UujBzYu6z0E",
+                        embed_url="https://www.youtube.com/embed/UujBzYu6z0E",
+                        category="REACTION",
+                        views="4.6K",
+                        likes="92",
+                        duration="5:03",
+                        upload_date="Feb 2025",
+                        description="A fresh reaction to Ayra Starr's latest release.",
+                    ),
+                ]
+            )
 
-def get_spotify_token():
-    """Get Spotify access token"""
-    cached = get_cached("spotify_token")
-    if cached:
-        return cached
-    
-    url = "https://accounts.spotify.com/api/token"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    data = {
-        "grant_type": "client_credentials",
-        "client_id": SPOTIFY_CLIENT_ID,
-        "client_secret": SPOTIFY_CLIENT_SECRET
-    }
-    
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-        token_data = response.json()
-        set_cache("spotify_token", token_data["access_token"])
-        return token_data["access_token"]
-    else:
-        raise HTTPException(status_code=500, detail="Failed to get Spotify token")
+        if not db.query(models.Track).first():
+            db.add_all(
+                [
+                    models.Track(
+                        track_number=1,
+                        title="Umbrella",
+                        artist_name="Vida Brown",
+                        featured_artist=None,
+                        year="2024",
+                        streams="12.4K",
+                        track_type="Single",
+                        artist_id=artist.id,
+                    ),
+                    models.Track(
+                        track_number=2,
+                        title="PON ME (Everything)",
+                        artist_name="Vida Brown",
+                        featured_artist=None,
+                        year="2025",
+                        streams="8.2K",
+                        track_type="Single",
+                        artist_id=artist.id,
+                    ),
+                ]
+            )
 
-# ============== YOUTUBE ENDPOINTS ==============
+        if not db.query(models.GalleryImage).first():
+            db.add_all(
+                [
+                    models.GalleryImage(
+                        url="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&q=80",
+                        alt_text="Vida Brown on stage",
+                        order=1,
+                    ),
+                    models.GalleryImage(
+                        url="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80",
+                        alt_text="Studio session",
+                        order=2,
+                    ),
+                    models.GalleryImage(
+                        url="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&q=80",
+                        alt_text="Creative portrait",
+                        order=3,
+                    ),
+                ]
+            )
 
-@app.get("/api/youtube/channel")
-async def get_youtube_channel():
-    """Get YouTube channel info"""
-    cached = get_cached("youtube_channel")
-    if cached:
-        return cached
-    
-    # VIDA BROWN'S CHANNEL ID - Replace with actual channel ID
-    channel_id = "UC_YOUR_CHANNEL_ID"  # TODO: Get from YouTube
-    
-    url = "https://www.googleapis.com/youtube/v3/channels"
-    params = {
-        "part": "snippet,statistics",
-        "id": channel_id,
-        "key": YOUTUBE_API_KEY
-    }
-    
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        if data["items"]:
-            channel = data["items"][0]
-            result = {
-                "title": channel["snippet"]["title"],
-                "description": channel["snippet"]["description"],
-                "thumbnail": channel["snippet"]["thumbnails"]["high"]["url"],
-                "subscriberCount": format_number(int(channel["statistics"].get("subscriberCount", 0))),
-                "viewCount": format_number(int(channel["statistics"].get("viewCount", 0))),
-                "videoCount": channel["statistics"].get("videoCount", 0)
-            }
-            set_cache("youtube_channel", result)
-            return result
-    
-    raise HTTPException(status_code=404, detail="Channel not found")
+        if not db.query(models.Product).first():
+            db.add(
+                models.Product(
+                    name="Signature Tee",
+                    description="Limited-edition artwork tee",
+                    price=3500,
+                    image_url="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80",
+                    is_available=True,
+                )
+            )
 
-@app.get("/api/youtube/videos")
-async def get_youtube_videos(
-    limit: int = Query(10, ge=1, le=50),
-    offset: int = Query(0, ge=0)
-):
-    """Get YouTube videos from channel"""
-    cache_key = f"youtube_videos_{limit}_{offset}"
-    cached = get_cached(cache_key)
-    if cached:
-        return cached
-    
-    # VIDA BROWN'S CHANNEL ID - Replace with actual channel ID
-    channel_id = "UC_YOUR_CHANNEL_ID"  # TODO: Get from YouTube
-    
-    url = "https://www.googleapis.com/youtube/v3/search"
-    params = {
-        "part": "snippet",
-        "channelId": channel_id,
-        "order": "date",
-        "type": "video",
-        "maxResults": limit,
-        "key": YOUTUBE_API_KEY
-    }
-    
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        videos = []
-        
-        for item in data["items"][offset:]:
-            video_id = item["id"]["videoId"]
-            snippet = item["snippet"]
-            
-            # Get video statistics
-            stats_url = "https://www.googleapis.com/youtube/v3/videos"
-            stats_params = {
-                "part": "statistics,contentDetails",
-                "id": video_id,
-                "key": YOUTUBE_API_KEY
-            }
-            stats_response = requests.get(stats_url, params=stats_params)
-            
-            if stats_response.status_code == 200:
-                stats_data = stats_response.json()
-                if stats_data["items"]:
-                    stats = stats_data["items"][0]["statistics"]
-                    content_details = stats_data["items"][0]["contentDetails"]
-                    
-                    videos.append({
-                        "id": video_id,
-                        "title": snippet["title"],
-                        "description": snippet["description"],
-                        "thumbnail": snippet["thumbnails"]["high"]["url"],
-                        "publishedAt": snippet["publishedAt"],
-                        "embedUrl": f"https://www.youtube.com/embed/{video_id}",
-                        "views": format_number(int(stats.get("viewCount", 0))),
-                        "likes": format_number(int(stats.get("likeCount", 0))),
-                        "duration": parse_iso_duration(content_details["duration"]),
-                        "category": "HIT OR MISS"  # Default category
-                    })
-        
-        result = {"videos": videos, "total": len(videos)}
-        set_cache(cache_key, result)
-        return result
-    
-    raise HTTPException(status_code=500, detail="Failed to fetch YouTube videos")
+        db.commit()
+    finally:
+        db.close()
 
-@app.get("/api/videos/featured")
-async def get_featured_video():
-    """Get most popular video"""
-    videos_data = await get_youtube_videos(limit=20)
-    videos = videos_data["videos"]
-    
-    if videos:
-        # Sort by views and return the most popular
-        def parse_views(view_str):
-            return float(view_str.replace("K", "000").replace("M", "000000").replace(".", ""))
-        
-        sorted_videos = sorted(videos, key=lambda x: parse_views(x["views"]), reverse=True)
-        return sorted_videos[0]
-    
-    raise HTTPException(status_code=404, detail="No videos found")
 
-# ============== SPOTIFY ENDPOINTS ==============
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    try:
+        response = await call_next(request)
+        logger.info(f"Completed request: {request.method} {request.url} -> {response.status_code}")
+        return response
+    except Exception:
+        logger.exception("Unhandled exception during request")
+        raise
 
-@app.get("/api/spotify/artist")
-async def get_spotify_artist():
-    """Get Spotify artist info"""
-    cached = get_cached("spotify_artist")
-    if cached:
-        return cached
-    
-    artist_id = "3ihbWDeubJO4XmeZlCGqZL"  # Vida Brown's Spotify ID
-    token = get_spotify_token()
-    
-    url = f"https://api.spotify.com/v1/artists/{artist_id}"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
-        artist = response.json()
-        result = {
-            "id": artist["id"],
-            "name": artist["name"],
-            "genres": artist["genres"],
-            "followers": artist["followers"]["total"],
-            "popularity": artist["popularity"],
-            "images": artist["images"],
-            "externalUrls": artist["external_urls"]
-        }
-        set_cache("spotify_artist", result)
-        return result
-    
-    raise HTTPException(status_code=404, detail="Artist not found")
+
+def initialize_database() -> None:
+    Base.metadata.create_all(bind=engine)
+    seed_database()
+
+
+@app.on_event("startup")
+def startup_event() -> None:
+    initialize_database()
+
+
+initialize_database()
+
+
+@app.get("/health")
+def health_check() -> dict:
+    return {"status": "ok"}
+
+
+@app.get("/")
+def serve_index() -> str:
+    return (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/admin")
+def serve_admin() -> str:
+    return (FRONTEND_DIR / "admin.html").read_text(encoding="utf-8")
+
 
 @app.get("/api/spotify/tracks")
 async def get_spotify_tracks(
     limit: int = Query(20, ge=1, le=50),
-    offset: int = Query(0, ge=0)
+    offset: int = Query(0, ge=0),
 ):
-    """Get artist's top tracks"""
+    """Get artist's top tracks."""
     cache_key = f"spotify_tracks_{limit}_{offset}"
     cached = get_cached(cache_key)
     if cached:
         return cached
-    
-    artist_id = "3ihbWDeubJO4XmeZlCGqZL"  # Vida Brown's Spotify ID
-    token = get_spotify_token()
-    
-    url = f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks"
-    params = {"market": "US"}
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    response = requests.get(url, params=params, headers=headers)
-    if response.status_code == 200:
+
+    artist_id = "3ihbWDeubJO4XmeZlCGqZL"
+    token = ""
+    try:
+        response = requests.get(
+            f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks",
+            params={"market": "US"},
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=10,
+        )
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Failed to fetch tracks")
         data = response.json()
-        tracks = []
-        
-        for idx, track in enumerate(data["tracks"][offset:offset+limit], start=1):
-            tracks.append({
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to fetch tracks") from exc
+
+    tracks = []
+    for idx, track in enumerate(data["tracks"][offset: offset + limit], start=1):
+        tracks.append(
+            {
                 "id": track["id"],
                 "trackNumber": idx,
                 "title": track["name"],
@@ -281,79 +239,16 @@ async def get_spotify_tracks(
                 "duration_ms": track["duration_ms"],
                 "popularity": track["popularity"],
                 "previewUrl": track["preview_url"],
-                "externalUrls": track["external_urls"]
-            })
-        
-        result = {"tracks": tracks, "total": len(tracks)}
-        set_cache(cache_key, result)
-        return result
-    
-    raise HTTPException(status_code=500, detail="Failed to fetch tracks")
+                "externalUrls": track["external_urls"],
+            }
+        )
 
-# ============== COMBINED ENDPOINTS ==============
+    result = {"tracks": tracks, "total": len(tracks)}
+    set_cache(cache_key, result)
+    return result
 
-@app.get("/api/artist/profile")
-async def get_artist_profile():
-    """Get combined artist profile from YouTube and Spotify"""
-    try:
-        spotify_data = await get_spotify_artist()
-    except:
-        spotify_data = {
-            "name": "Vida Brown",
-            "followers": 0,
-            "images": [],
-            "externalUrls": {"spotify": "https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL"}
-        }
-    
-    try:
-        youtube_data = await get_youtube_channel()
-    except:
-        youtube_data = {
-            "description": "Malawian artist creating music, arts, and culture content.",
-            "thumbnail": "",
-            "subscriberCount": "0"
-        }
-    
-    return {
-        "name": spotify_data.get("name", "Vida Brown"),
-        "title": "Singer • Songwriter • Producer",
-        "bio": youtube_data.get("description", "Malawian artist creating music, arts, and culture content."),
-        "followers": spotify_data.get("followers", 0),
-        "youtubeSubscribers": youtube_data.get("subscriberCount", "0"),
-        "images": {
-            "spotify": spotify_data.get("images", [{}])[0].get("url") if spotify_data.get("images") else None,
-            "youtube": youtube_data.get("thumbnail", "")
-        },
-        "links": {
-            "youtube": "https://www.youtube.com/@VidaBrownOfficial",
-            "spotify": spotify_data.get("externalUrls", {}).get("spotify", "https://open.spotify.com/artist/3ihbWDeubJO4XmeZlCGqZL")
-        }
-    }
-
-# ============== ROOT & HEALTH ==============
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Vida Brown API - YouTube & Spotify Integration",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "endpoints": {
-            "artist_profile": "/api/artist/profile",
-            "youtube_videos": "/api/youtube/videos",
-            "featured_video": "/api/videos/featured",
-            "spotify_tracks": "/api/spotify/tracks"
-        }
-    }
-
-@app.get("/health")
-async def health_check():
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "cache_size": len(cache)
-    }
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

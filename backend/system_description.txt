@@ -1,0 +1,40 @@
+Project: Vida Brown Portfolio — System Overview
+
+Architecture
+- Monorepo with two top-level folders: `backend/` (FastAPI) and `frontend/` (static site).
+- Backend exposes a REST API under the `/api` prefix and serves static frontend pages at `/` and `/admin`.
+
+Backend (backend/)
+- Framework: FastAPI (mounted with Uvicorn for development).
+- Database: SQLite by default (file: `vidabrown.db`), configured via `database/database.py` using SQLAlchemy.
+- Models: SQLAlchemy models in `models/models.py` represent Artist, Video, Track, GalleryImage, Product, NewsletterSubscriber.
+- Schemas: Pydantic models in `schemas/schemas.py` define request/response shapes.
+- CRUD: `crud/crud.py` contains database helper functions used by route handlers.
+- Routes: `routes/routes.py` defines API endpoints for artist profile, videos, tracks, gallery, products, newsletter, and admin create endpoints.
+- App entry: `main.py` initializes the FastAPI app, mounts static files (`/assets`), creates DB tables, and seeds default content on import/startup.
+- Seeding: `seed_database()` adds initial Artist, Videos, Tracks, Gallery images and a Product when the DB is empty.
+- Dev/test: `tests/test_api.py` contains pytest tests; `uvicorn main:app --reload` runs the app locally.
+
+Frontend (frontend/)
+- Static HTML/CSS/JS served by the backend; `index.html` is the public portfolio page, `admin.html` is the admin dashboard.
+- JS fetches data from backend endpoints (e.g., `/api/videos`, `/api/artist/profile`) and renders content dynamically.
+
+Running locally
+1. Create/activate the virtualenv in `backend` (project has `.venv`).
+2. Install dependencies: `python -m pip install -r requirements.txt` (run inside `.venv`).
+3. Start app: `uvicorn main:app --reload` then open `http://127.0.0.1:8000/`.
+4. Tests: `python -m pytest -q` from `backend/`.
+
+Key behavior notes
+- Database initialization now runs at import time and on startup, ensuring test clients and Uvicorn import flows see seeded data.
+- API router is mounted at `/api` and returns JSON responses consistent with the Pydantic response models.
+- Admin endpoints (`/api/admin/...`) allow creating videos, tracks, and gallery images used by the frontend admin page.
+
+Troubleshooting
+- If import errors occur (e.g., missing packages), ensure `.venv` is activated and `requirements.txt` is installed.
+- If seeded data is missing, confirm the app has permission to create `vidabrown.db` in `backend/` and that the DB URL (env `DATABASE_URL`) is not overriding the SQLite path.
+
+Next steps (suggested)
+- Add authentication to admin endpoints.
+- Expand tests to cover create/admin flows.
+- Add nicer error handling and logging for production.
