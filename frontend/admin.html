@@ -1,247 +1,612 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vida Brown | Admin Dashboard</title>
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  <style>
-    body { padding: 24px; } .admin-shell { max-width: 960px; margin: 0 auto; display: grid; gap: 20px; } .glass-card { padding: 24px; border-radius: 20px; } form { display: grid; gap: 12px; } input, textarea, select, button { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); color: inherit; } button { cursor: pointer; } .status { min-height: 24px; font-size: 0.95rem; color: var(--text-secondary); }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vida Brown | Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <style>
+        /* --- Admin Dashboard Specific Styles --- */
+        .admin-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+        
+        .admin-sidebar { 
+            background: var(--bg-surface); 
+            border-right: 1px solid var(--glass-border); 
+            padding: 24px 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            position: sticky; 
+            top: 0; 
+            height: 100vh; 
+            overflow-y: auto; 
+        }
+        .admin-sidebar .logo { 
+            padding: 0 12px 24px; 
+            font-size: 20px; 
+            font-weight: 700; 
+            color: var(--primary); 
+            border-bottom: 1px solid var(--glass-border); 
+            margin-bottom: 16px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .admin-nav-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            color: var(--text-secondary); 
+            font-size: 14px; 
+            font-weight: 600; 
+            text-decoration: none; 
+            transition: all 0.2s; 
+            cursor: pointer; 
+            border: none; 
+            background: transparent; 
+            width: 100%; 
+            text-align: left; 
+            font-family: inherit;
+        }
+        .admin-nav-link:hover, .admin-nav-link.active { 
+            background: rgba(198, 191, 255, 0.1); 
+            color: var(--primary); 
+        }
+        .admin-nav-link .material-symbols-outlined { font-size: 20px; }
+        
+        .admin-main { 
+            padding: 32px 48px; 
+            background: var(--bg-base); 
+            overflow-y: auto; 
+        }
+        .admin-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 32px; 
+            flex-wrap: wrap; 
+            gap: 16px; 
+        }
+        .admin-search { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            background: var(--glass-bg); 
+            border: 1px solid var(--glass-border); 
+            border-radius: 999px; 
+            padding: 8px 16px; 
+            width: 320px; 
+            max-width: 100%; 
+        }
+        .admin-search input { 
+            background: transparent; 
+            border: none; 
+            color: var(--text-primary); 
+            outline: none; 
+            width: 100%; 
+            font-size: 14px; 
+            font-family: inherit;
+        }
+        
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 24px; 
+            margin-bottom: 32px; 
+        }
+        .stat-card { padding: 24px; display: flex; align-items: center; gap: 16px; }
+        .stat-icon { 
+            width: 48px; height: 48px; border-radius: 12px; 
+            background: rgba(198, 191, 255, 0.15); 
+            color: var(--primary); 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .stat-icon.green { background: rgba(68, 237, 204, 0.15); color: var(--secondary); }
+        .stat-icon.orange { background: rgba(255, 183, 125, 0.15); color: var(--tertiary); }
+        .stat-icon.red { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .stat-info h4 { font-size: 14px; color: var(--text-secondary); font-weight: 500; margin-bottom: 4px; }
+        .stat-info .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); }
+        
+        .admin-section { display: none; animation: fadeIn 0.3s ease; }
+        .admin-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .admin-form { display: grid; gap: 16px; max-width: 600px; }
+        .admin-input { 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.05); 
+            color: inherit; 
+            outline: none; 
+            font-size: 16px; 
+            transition: border-color 0.2s; 
+            font-family: inherit;
+        }
+        html:not(.dark) .admin-input { 
+            border: 1px solid rgba(0,0,0,0.1); 
+            background: rgba(0,0,0,0.03); 
+        }
+        .admin-input:focus { border-color: var(--primary); }
+        .admin-input::placeholder { color: var(--text-secondary); }
+        textarea.admin-input { min-height: 100px; resize: vertical; }
+        
+        .checkbox-label { 
+            display: flex; align-items: center; gap: 8px; 
+            color: var(--text-secondary); font-size: 14px; cursor: pointer; 
+        }
+        .checkbox-label input { accent-color: var(--primary); width: 16px; height: 16px; }
+        
+        .login-overlay { 
+            position: fixed; inset: 0; 
+            background: var(--bg-base); 
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 100; 
+        }
+        .login-card { width: 100%; max-width: 400px; padding: 48px; text-align: center; }
+        
+        .list-container { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+        .list-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 16px; background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--glass-border); border-radius: 12px; 
+            flex-wrap: wrap; gap: 12px; 
+        }
+        .list-item-info { display: flex; align-items: center; gap: 12px; }
+        .list-item-info img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; }
+        .list-item-actions { display: flex; gap: 8px; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+        
+        .status-msg { min-height: 24px; font-size: 14px; margin-top: 8px; }
+        .status-msg.error { color: #f87171; }
+        .status-msg.success { color: var(--secondary); }
+        
+        @media (max-width: 768px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .admin-sidebar { display: none; } 
+            .admin-main { padding: 24px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+            .admin-search { width: 100%; }
+        }
+    </style>
 </head>
 <body>
-  <div class="admin-shell">
-    <div class="glass-card">
-      <h1>Admin Dashboard</h1>
-      <p>Manage featured videos, tracks, and gallery images for the portfolio without touching the main site code.</p>
-      <div id="login-area">
-        <div style="margin-bottom:12px;">
-          <label>Admin password: <input id="admin-password" type="password" placeholder="password"></label>
-          <button id="login-btn" class="btn">Login</button>
-          <button id="logout-btn" class="btn" style="display:none;">Logout</button>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="glass-card login-card">
+            <span class="material-symbols-outlined" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;">admin_panel_settings</span>
+            <h2 style="margin-bottom: 8px;">Admin Access</h2>
+            <p style="margin-bottom: 24px;">Enter your password to manage content.</p>
+            <form id="login-form" class="admin-form" style="max-width: 100%;">
+                <input type="password" id="admin-password" class="admin-input" placeholder="Admin password" required />
+                <button type="submit" class="btn btn-primary" style="justify-content: center; width: 100%;">Login</button>
+            </form>
+            <div id="login-status" class="status-msg"></div>
         </div>
-        <div id="login-status" class="status">Not authenticated</div>
-      </div>
-      <div class="status" id="status">Ready to publish new content.</div>
     </div>
 
-    <div class="glass-card" id="video-card" style="display:none;">
-      <h2>Add Video</h2>
-      <form id="video-form">
-        <input name="title" placeholder="Title" required />
-        <input name="youtube_id" placeholder="YouTube ID" required />
-        <input name="embed_url" placeholder="Embed URL" required />
-        <input name="category" placeholder="Category" value="HIT OR MISS" required />
-        <input name="views" placeholder="Views" value="0" />
-        <input name="likes" placeholder="Likes" value="0" />
-        <input name="duration" placeholder="Duration" value="0:00" />
-        <input name="upload_date" placeholder="Upload date" value="Today" />
-        <textarea name="description" placeholder="Description"></textarea>
-        <label><input type="checkbox" name="is_featured" /> Featured video</label>
-        <button class="btn btn-primary" type="submit">Save video</button>
-      </form>
-    </div>
+    <!-- Main Admin Layout -->
+    <div class="admin-layout" id="admin-layout" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="logo">
+                <span class="material-symbols-outlined">equalizer</span> VIDA BROWN
+            </div>
+            <button class="admin-nav-link active" data-tab="dashboard">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </button>
+            <button class="admin-nav-link" data-tab="videos">
+                <span class="material-symbols-outlined">video_library</span> Videos
+            </button>
+            <button class="admin-nav-link" data-tab="music">
+                <span class="material-symbols-outlined">music_note</span> Music
+            </button>
+            <button class="admin-nav-link" data-tab="gallery">
+                <span class="material-symbols-outlined">photo_library</span> Gallery
+            </button>
+            <div style="flex: 1;"></div>
+            <button class="admin-nav-link" id="logout-btn" style="color: #f87171;">
+                <span class="material-symbols-outlined">logout</span> Logout
+            </button>
+        </aside>
 
-    <div class="glass-card" id="track-card" style="display:none;">
-      <h2>Add Track</h2>
-      <form id="track-form">
-        <input name="title" placeholder="Track title" required />
-        <input name="artist_name" placeholder="Artist name" value="Vida Brown" required />
-        <input name="track_number" placeholder="Track number" type="number" required />
-        <input name="year" placeholder="Year" />
-        <input name="streams" placeholder="Streams" value="0" />
-        <input name="track_type" placeholder="Track type" value="Single" />
-        <input name="artist_id" placeholder="Artist ID" value="1" type="number" />
-        <button class="btn btn-primary" type="submit">Save track</button>
-      </form>
-    </div>
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Header -->
+            <header class="admin-header">
+                <div>
+                    <h2 id="page-title">Dashboard</h2>
+                    <p style="color: var(--text-secondary); font-size: 14px;">Welcome back, Vida 👋</p>
+                </div>
+                <div class="admin-search">
+                    <span class="material-symbols-outlined" style="color: var(--text-secondary);">search</span>
+                    <input type="text" placeholder="Search content..." />
+                </div>
+            </header>
 
-    <div class="glass-card" id="gallery-card" style="display:none;">
-      <h2>Add Gallery Image</h2>
-      <form id="gallery-form">
-        <input name="url" placeholder="Image URL" required />
-        <input name="alt_text" placeholder="Alt text" required />
-        <input name="order" placeholder="Order" type="number" value="0" />
-        <button class="btn btn-primary" type="submit">Save image</button>
-      </form>
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon"><span class="material-symbols-outlined">video_library</span></div>
+                        <div class="stat-info">
+                            <h4>Total Videos</h4>
+                            <div class="stat-value" id="stat-videos">0</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon green"><span class="material-symbols-outlined">music_note</span></div>
+                        <div class="stat-info">
+                            <h4>Total Tracks</h4>
+                            <div class="stat-value" id="stat-tracks">0</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon orange"><span class="material-symbols-outlined">photo_library</span></div>
+                        <div class="stat-info">
+                            <h4>Gallery Images</h4>
+                            <div class="stat-value" id="stat-gallery">0</div>
+                        </div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon red"><span class="material-symbols-outlined">group</span></div>
+                        <div class="stat-info">
+                            <h4>Followers</h4>
+                            <div class="stat-value">82</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding: 32px;">
+                    <h3 style="margin-bottom: 16px;">Recent Activity</h3>
+                    <p style="color: var(--text-secondary);">System is ready. Use the sidebar to add or manage content.</p>
+                    <div id="global-status" class="status-msg"></div>
+                </div>
+            </section>
+
+            <!-- Videos Section -->
+            <section id="videos" class="admin-section">
+                <div class="glass-card" style="padding: 32px; margin-bottom: 32px;">
+                    <h3 style="margin-bottom: 24px;">Add New Video</h3>
+                    <form id="video-form" class="admin-form">
+                        <input name="title" class="admin-input" placeholder="Video Title" required />
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <input name="youtube_id" class="admin-input" placeholder="YouTube ID (e.g., dQw4w9WgXcQ)" required />
+                            <input name="embed_url" class="admin-input" placeholder="Embed URL" required />
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                            <input name="category" class="admin-input" placeholder="Category" value="HIT OR MISS" required />
+                            <input name="views" class="admin-input" placeholder="Views" value="0" />
+                            <input name="likes" class="admin-input" placeholder="Likes" value="0" />
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <input name="duration" class="admin-input" placeholder="Duration (e.g., 5:06)" value="0:00" />
+                            <input name="upload_date" class="admin-input" placeholder="Upload date" value="Today" />
+                        </div>
+                        <textarea name="description" class="admin-input" placeholder="Video description"></textarea>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="is_featured" /> Feature this video on the homepage
+                        </label>
+                        <button class="btn btn-primary" type="submit" style="justify-content: center;">Save Video</button>
+                    </form>
+                </div>
+
+                <h3 style="margin-bottom: 16px;">Existing Videos</h3>
+                <div id="videos-list" class="list-container">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Music Section -->
+            <section id="music" class="admin-section">
+                <div class="glass-card" style="padding: 32px; margin-bottom: 32px;">
+                    <h3 style="margin-bottom: 24px;">Add New Track</h3>
+                    <form id="track-form" class="admin-form">
+                        <input name="title" class="admin-input" placeholder="Track Title" required />
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <input name="artist_name" class="admin-input" placeholder="Artist Name" value="Vida Brown" required />
+                            <input name="track_number" class="admin-input" placeholder="Track Number" type="number" required />
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+                            <input name="year" class="admin-input" placeholder="Year" />
+                            <input name="streams" class="admin-input" placeholder="Streams" value="0" />
+                            <input name="track_type" class="admin-input" placeholder="Type (Single/Album)" value="Single" />
+                        </div>
+                        <input name="artist_id" class="admin-input" placeholder="Artist ID" value="1" type="number" style="display:none;" />
+                        <button class="btn btn-primary" type="submit" style="justify-content: center;">Save Track</button>
+                    </form>
+                </div>
+
+                <h3 style="margin-bottom: 16px;">Existing Tracks</h3>
+                <div id="tracks-list" class="list-container">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Gallery Section -->
+            <section id="gallery" class="admin-section">
+                <div class="glass-card" style="padding: 32px; margin-bottom: 32px;">
+                    <h3 style="margin-bottom: 24px;">Add Gallery Image</h3>
+                    <form id="gallery-form" class="admin-form">
+                        <input name="url" class="admin-input" placeholder="Image URL" required />
+                        <input name="alt_text" class="admin-input" placeholder="Alt Text (for accessibility)" required />
+                        <input name="order" class="admin-input" placeholder="Display Order" type="number" value="0" />
+                        <button class="btn btn-primary" type="submit" style="justify-content: center;">Save Image</button>
+                    </form>
+                </div>
+
+                <h3 style="margin-bottom: 16px;">Existing Images</h3>
+                <div id="gallery-list" class="list-container">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+        </main>
     </div>
-  </div>
 
     <script>
-    const status = document.getElementById('status');
-    const setStatus = (message, isError = false) => {
-      status.textContent = message;
-      status.style.color = isError ? 'tomato' : 'var(--text-secondary)';
-    };
+        // --- UI Logic ---
+        const tabs = document.querySelectorAll('.admin-nav-link[data-tab]');
+        const sections = document.querySelectorAll('.admin-section');
+        const pageTitle = document.getElementById('page-title');
 
-    // Auth helpers
-    const TOKEN_KEY = 'vida_admin_token';
-    function setToken(token) { if (token) localStorage.setItem(TOKEN_KEY, token); else localStorage.removeItem(TOKEN_KEY); }
-    function getToken() { return localStorage.getItem(TOKEN_KEY); }
-
-    async function postJson(url, payload) {
-      const headers = { 'Content-Type': 'application/json' };
-      const token = getToken();
-      if (token) headers['X-Admin-Token'] = token;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || 'Request failed');
-      return data;
-    }
-
-    async function putJson(url, payload) {
-      const headers = { 'Content-Type': 'application/json' };
-      const token = getToken();
-      if (token) headers['X-Admin-Token'] = token;
-      const response = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(payload) });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || 'Request failed');
-      return data;
-    }
-
-    async function deleteReq(url) {
-      const headers = {};
-      const token = getToken();
-      if (token) headers['X-Admin-Token'] = token;
-      const response = await fetch(url, { method: 'DELETE', headers });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.detail || 'Request failed');
-      return data;
-    }
-
-    async function ensureAuth() {
-      const token = getToken();
-      if (!token) return false;
-      // attempt a cheap authenticated request
-      try {
-        const res = await fetch('/api/videos?limit=1', { headers: { 'X-Admin-Token': token } });
-        if (res.status === 401) { setToken(null); return false; }
-        return true;
-      } catch (e) { setToken(null); return false; }
-    }
-
-    async function showAuthenticatedUI() {
-      document.getElementById('video-card').style.display = '';
-      document.getElementById('track-card').style.display = '';
-      document.getElementById('gallery-card').style.display = '';
-      document.getElementById('login-btn').style.display = 'none';
-      document.getElementById('logout-btn').style.display = '';
-      document.getElementById('login-status').textContent = 'Authenticated';
-      await refreshLists();
-    }
-
-    async function refreshLists() {
-      try {
-        const videos = await fetch('/api/videos?limit=50').then(r=>r.json());
-        const tracks = await fetch('/api/music/tracks?limit=100').then(r=>r.json());
-        const gallery = await fetch('/api/gallery').then(r=>r.json());
-        document.getElementById('stat-videos').textContent = videos.total || videos.videos?.length || 0;
-        document.getElementById('stat-tracks').textContent = tracks.total || tracks.tracks?.length || 0;
-        document.getElementById('stat-gallery').textContent = gallery.length || 0;
-
-        const vlist = document.getElementById('videos-list'); vlist.innerHTML = '';
-        (videos.videos||[]).forEach(v=>{
-          const el = document.createElement('div');
-          el.innerHTML = `<strong>${v.title}</strong> <button data-id="${v.id}" class="edit-v">Edit</button> <button data-id="${v.id}" class="del-v">Delete</button>`;
-          vlist.appendChild(el);
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const target = tab.getAttribute('data-tab');
+                sections.forEach(sec => sec.classList.remove('active'));
+                document.getElementById(target).classList.add('active');
+                
+                pageTitle.textContent = tab.textContent.trim();
+            });
         });
 
-        const tlist = document.getElementById('tracks-list'); tlist.innerHTML = '';
-        (tracks.tracks||[]).forEach(t=>{
-          const el = document.createElement('div');
-          el.innerHTML = `<strong>${t.title}</strong> <button data-id="${t.id}" class="edit-t">Edit</button> <button data-id="${t.id}" class="del-t">Delete</button>`;
-          tlist.appendChild(el);
+        // --- Auth & API Logic ---
+        const globalStatus = document.getElementById('global-status');
+        const loginStatus = document.getElementById('login-status');
+        
+        const setStatus = (message, isError = false, isGlobal = false) => {
+            const el = isGlobal ? globalStatus : loginStatus;
+            el.textContent = message;
+            el.className = 'status-msg ' + (isError ? 'error' : 'success');
+            if (isGlobal) {
+                setTimeout(() => { el.textContent = ''; el.className = 'status-msg'; }, 3000);
+            }
+        };
+
+        const TOKEN_KEY = 'vida_admin_token';
+        function setToken(token) { if (token) localStorage.setItem(TOKEN_KEY, token); else localStorage.removeItem(TOKEN_KEY); }
+        function getToken() { return localStorage.getItem(TOKEN_KEY); }
+
+        async function postJson(url, payload) {
+            const headers = { 'Content-Type': 'application/json' };
+            const token = getToken();
+            if (token) headers['X-Admin-Token'] = token;
+            const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.detail || 'Request failed');
+            return data;
+        }
+
+        async function deleteReq(url) {
+            const headers = {};
+            const token = getToken();
+            if (token) headers['X-Admin-Token'] = token;
+            const response = await fetch(url, { method: 'DELETE', headers });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.detail || 'Request failed');
+            return data;
+        }
+
+        async function ensureAuth() {
+            const token = getToken();
+            if (!token) return false;
+            try {
+                const res = await fetch('/api/videos?limit=1', { headers: { 'X-Admin-Token': token } });
+                if (res.status === 401) { setToken(null); return false; }
+                return true;
+            } catch (e) { setToken(null); return false; }
+        }
+
+        async function showAuthenticatedUI() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-layout').style.display = 'grid';
+            await refreshLists();
+        }
+
+        async function refreshLists() {
+            try {
+                const [videosRes, tracksRes, galleryRes] = await Promise.all([
+                    fetch('/api/videos?limit=50').then(r => r.json()),
+                    fetch('/api/music/tracks?limit=100').then(r => r.json()),
+                    fetch('/api/gallery').then(r => r.json())
+                ]);
+
+                const videos = videosRes.videos || videosRes || [];
+                const tracks = tracksRes.tracks || tracksRes || [];
+                const gallery = galleryRes || [];
+
+                document.getElementById('stat-videos').textContent = videos.length;
+                document.getElementById('stat-tracks').textContent = tracks.length;
+                document.getElementById('stat-gallery').textContent = gallery.length;
+
+                // Render Videos
+                const vlist = document.getElementById('videos-list'); 
+                vlist.innerHTML = videos.length ? '' : '<p style="color:var(--text-secondary); padding: 16px;">No videos found.</p>';
+                videos.forEach(v => {
+                    const el = document.createElement('div');
+                    el.className = 'list-item';
+                    el.innerHTML = `
+                        <div class="list-item-info">
+                            <div>
+                                <div style="font-weight:600;">${v.title}</div>
+                                <div style="font-size:12px; color:var(--text-secondary);">${v.category || 'Video'} • ${v.views || 0} views</div>
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-outline btn-sm del-v" data-id="${v.id}">Delete</button>
+                        </div>
+                    `;
+                    vlist.appendChild(el);
+                });
+
+                // Render Tracks
+                const tlist = document.getElementById('tracks-list'); 
+                tlist.innerHTML = tracks.length ? '' : '<p style="color:var(--text-secondary); padding: 16px;">No tracks found.</p>';
+                tracks.forEach(t => {
+                    const el = document.createElement('div');
+                    el.className = 'list-item';
+                    el.innerHTML = `
+                        <div class="list-item-info">
+                            <div>
+                                <div style="font-weight:600;">${t.title}</div>
+                                <div style="font-size:12px; color:var(--text-secondary);">${t.artist_name} • ${t.streams || 0} streams</div>
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-outline btn-sm del-t" data-id="${t.id}">Delete</button>
+                        </div>
+                    `;
+                    tlist.appendChild(el);
+                });
+
+                // Render Gallery
+                const glist = document.getElementById('gallery-list'); 
+                glist.innerHTML = gallery.length ? '' : '<p style="color:var(--text-secondary); padding: 16px;">No images found.</p>';
+                gallery.forEach(g => {
+                    const el = document.createElement('div');
+                    el.className = 'list-item';
+                    el.innerHTML = `
+                        <div class="list-item-info">
+                            <img src="${g.url}" alt="${g.alt_text}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2248%22 height=%2248%22><rect width=%2248%22 height=%2248%22 fill=%22%23333%22/></svg>'">
+                            <div>
+                                <div style="font-weight:600;">${g.alt_text}</div>
+                                <div style="font-size:12px; color:var(--text-secondary);">Order: ${g.order || 0}</div>
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-outline btn-sm del-g" data-id="${g.id}">Delete</button>
+                        </div>
+                    `;
+                    glist.appendChild(el);
+                });
+
+                // Attach delete listeners
+                document.querySelectorAll('.del-v').forEach(btn => btn.addEventListener('click', async (e) => {
+                    if(!confirm('Delete this video?')) return;
+                    try {
+                        await deleteReq(`/api/admin/videos/${e.target.dataset.id}`);
+                        setStatus('Video deleted.', false, true);
+                        refreshLists();
+                    } catch(err) { setStatus(err.message, true, true); }
+                }));
+
+                document.querySelectorAll('.del-t').forEach(btn => btn.addEventListener('click', async (e) => {
+                    if(!confirm('Delete this track?')) return;
+                    try {
+                        await deleteReq(`/api/admin/tracks/${e.target.dataset.id}`);
+                        setStatus('Track deleted.', false, true);
+                        refreshLists();
+                    } catch(err) { setStatus(err.message, true, true); }
+                }));
+
+                document.querySelectorAll('.del-g').forEach(btn => btn.addEventListener('click', async (e) => {
+                    if(!confirm('Delete this image?')) return;
+                    try {
+                        await deleteReq(`/api/admin/gallery/${e.target.dataset.id}`);
+                        setStatus('Image deleted.', false, true);
+                        refreshLists();
+                    } catch(err) { setStatus(err.message, true, true); }
+                }));
+
+            } catch (e) {
+                console.warn('Refresh failed', e);
+            }
+        }
+
+        // Initialize
+        (async () => {
+            const ok = await ensureAuth();
+            if (ok) await showAuthenticatedUI();
+        })();
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pw = document.getElementById('admin-password').value;
+            try {
+                const res = await fetch('/api/admin/login', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ password: pw }) 
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || 'Login failed');
+                setToken(data.token);
+                await showAuthenticatedUI();
+            } catch (err) {
+                setStatus(err.message, true, false);
+            }
         });
 
-        const glist = document.getElementById('gallery-list'); glist.innerHTML = '';
-        (gallery||[]).forEach(g=>{
-          const el = document.createElement('div');
-          el.innerHTML = `<img src="${g.url}" alt="" style="height:48px;margin-right:8px;"> <strong>${g.alt_text}</strong> <button data-id="${g.id}" class="edit-g">Edit</button> <button data-id="${g.id}" class="del-g">Delete</button>`;
-          glist.appendChild(el);
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            setToken(null);
+            document.getElementById('admin-layout').style.display = 'none';
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('admin-password').value = '';
+            loginStatus.textContent = '';
         });
-      } catch (e) {
-        console.warn('refresh failed', e);
-      }
-    }
 
-    // initialize auth state
-    (async ()=>{
-      const ok = await ensureAuth();
-      if (ok) await showAuthenticatedUI();
-    })();
+        // Forms
+        document.getElementById('video-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const payload = Object.fromEntries(new FormData(event.target));
+            payload.is_featured = event.target.is_featured.checked;
+            try {
+                await postJson('/api/admin/videos', payload);
+                setStatus('Video saved successfully.', false, true);
+                event.target.reset();
+                await refreshLists();
+            } catch (error) {
+                setStatus(error.message, true, true);
+            }
+        });
 
-    document.getElementById('video-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.target));
-      payload.is_featured = event.target.is_featured.checked;
-      try {
-        await postJson('/api/admin/videos', payload);
-        setStatus('Video saved successfully.');
-        event.target.reset();
-        await refreshLists();
-      } catch (error) {
-        setStatus(error.message, true);
-      }
-    });
+        document.getElementById('track-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const payload = Object.fromEntries(new FormData(event.target));
+            payload.track_number = Number(payload.track_number);
+            payload.artist_id = Number(payload.artist_id);
+            try {
+                await postJson('/api/admin/tracks', payload);
+                setStatus('Track saved successfully.', false, true);
+                event.target.reset();
+                await refreshLists();
+            } catch (error) {
+                setStatus(error.message, true, true);
+            }
+        });
 
-    document.getElementById('track-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.target));
-      payload.track_number = Number(payload.track_number);
-      payload.artist_id = Number(payload.artist_id);
-      try {
-        await postJson('/api/admin/tracks', payload);
-        setStatus('Track saved successfully.');
-        event.target.reset();
-        await refreshLists();
-      } catch (error) {
-        setStatus(error.message, true);
-      }
-    });
-
-    document.getElementById('gallery-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const payload = Object.fromEntries(new FormData(event.target));
-      payload.order = Number(payload.order);
-      try {
-        await postJson('/api/admin/gallery', payload);
-        setStatus('Gallery image saved successfully.');
-        event.target.reset();
-        await refreshLists();
-      } catch (error) {
-        setStatus(error.message, true);
-      }
-    });
-
-    // Login handling
-    document.getElementById('login-btn').addEventListener('click', async ()=>{
-      const pw = document.getElementById('admin-password').value;
-      try {
-        const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw }) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Login failed');
-        setToken(data.token);
-        document.getElementById('login-status').textContent = 'Authenticated';
-        await showAuthenticatedUI();
-      } catch (e) {
-        document.getElementById('login-status').textContent = 'Login failed';
-        console.error(e);
-      }
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', ()=>{
-      setToken(null);
-      document.getElementById('video-card').style.display = 'none';
-      document.getElementById('track-card').style.display = 'none';
-      document.getElementById('gallery-card').style.display = 'none';
-      document.getElementById('login-btn').style.display = '';
-      document.getElementById('logout-btn').style.display = 'none';
-      document.getElementById('login-status').textContent = 'Not authenticated';
-    });
-  </script>
+        document.getElementById('gallery-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const payload = Object.fromEntries(new FormData(event.target));
+            payload.order = Number(payload.order);
+            try {
+                await postJson('/api/admin/gallery', payload);
+                setStatus('Gallery image saved successfully.', false, true);
+                event.target.reset();
+                await refreshLists();
+            } catch (error) {
+                setStatus(error.message, true, true);
+            }
+        });
+    </script>
 </body>
 </html>

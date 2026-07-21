@@ -1,6 +1,6 @@
 const API_BASE = 'http://localhost:8000/api';
-const ADMIN_TOKEN_KEY = 'vida_admin_token';
 
+// --- Helper Functions ---
 function setText(selector, value) {
   const element = document.querySelector(selector);
   if (element && value !== undefined && value !== null) {
@@ -8,12 +8,43 @@ function setText(selector, value) {
   }
 }
 
+async function request(endpoint, options = {}) {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    ...options,
+  });
+
+  if (!response.ok) {
+    // FastAPI returns errors in a "detail" field
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.detail || `API Error ${response.status}`);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  return contentType.includes('application/json') ? response.json() : response.text();
+}
+
+// --- Content Loading Functions ---
+async function loadArtistProfile() {
+  try {
+    const artist = await request('/artist/profile');
+    setText('#artist-name', artist.name);
+    setText('#artist-title', artist.title);
+    setText('#artist-bio', artist.bio);
+    setText('#music-artist-name', artist.name);
+    setText('#music-artist-title', artist.title);
+    setText('#follower-count', artist.followers);
+  } catch (error) {
+    console.warn('Artist profile unavailable', error);
+  }
+}
+
 function createVideoCard(video) {
-  const badgeClass = video.category === 'REACTION' ? 'badge-secondary' : 'badge-primary';
+  const badgeClass = video.category === 'REACTION' ? 'badge-secondary' : (video.category === 'MALAWI MUSIC' ? 'badge-tertiary' : 'badge-primary');
   return `
     <div class="glass-card video-card">
       <div class="video-wrapper">
-        <iframe src="${video.embed_url}" title="${video.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe src="${video.embed_url}" title="${video.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
       </div>
       <div class="video-card-info">
         <div class="badges">
@@ -23,7 +54,7 @@ function createVideoCard(video) {
         <h4>${video.title}</h4>
         <p>${video.description || 'Latest episode'}</p>
         <div class="video-stats">
-          <span>${video.views} views</span>
+          <span>${video.views_display} views</span>
           <span>•</span>
           <span>${video.upload_date}</span>
         </div>
@@ -32,79 +63,25 @@ function createVideoCard(video) {
   `;
 }
 
-async function request(endpoint, options = {}) {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    ...options,
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(body || `API Error ${response.status}`);
-  }
-
-  const contentType = response.headers.get('content-type') || '';
-  return contentType.includes('application/json') ? response.json() : response.text();
-}
-
-async function loadArtistProfile() {
-  try {
-    const artist = await request('/artist/profile');
-    setText('#artist-name', artist.name);
-    setText('#artist-title', artist.title);
-    setText('#artist-bio', artist.bio);
-  } catch (error) {
-    console.warn('Artist profile unavailable', error);
-  }
-}
-
-function getAdminToken() {
-  return localStorage.getItem(ADMIN_TOKEN_KEY) || null;
-}
-
-function setAdminToken(token) {
-  if (token) localStorage.setItem(ADMIN_TOKEN_KEY, token);
-  else localStorage.removeItem(ADMIN_TOKEN_KEY);
-}
-
-async function authRequest(endpoint, options = {}) {
-  const token = getAdminToken();
-  const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
-  if (token) headers['X-Admin-Token'] = token;
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers,
-    ...options,
-  });
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(body || `API Error ${response.status}`);
-  }
-  const contentType = response.headers.get('content-type') || '';
-  return contentType.includes('application/json') ? response.json() : response.text();
-}
-
 async function loadFeaturedVideo() {
   try {
     const video = await request('/videos/featured');
-    const featured = document.querySelector('.featured-video');
-    if (featured) {
-      featured.innerHTML = `
-        <div class="video-wrapper">
-          <iframe src="${video.embed_url}" title="${video.title}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-        <div class="video-info">
-          <div class="badges">
-            <span class="badge badge-secondary">${video.category}</span>
-            <span class="badge badge-outline">${video.upload_date}</span>
-          </div>
-          <h3>${video.title}</h3>
-          <p>${video.description || ''}</p>
-          <div class="video-stats">
-            <span><span class="material-symbols-outlined">visibility</span> ${video.views} views</span>
-            <span><span class="material-symbols-outlined">thumb_up</span> ${video.likes} likes</span>
-            <span><span class="material-symbols-outlined">schedule</span> ${video.duration}</span>
-          </div>
-        </div>
+    
+    const iframe = document.getElementById('featured-video-iframe');
+    if (iframe) iframe.src = video.embed_url;
+    
+    setText('#featured-video-title', video.title);
+    setText('#featured-video-description', video.description);
+    setText('#featured-views', video.views_display);
+    setText('#featured-likes', video.likes_display);
+    setText('#featured-duration', video.duration);
+    
+    const badges = document.getElementById('featured-video-badges');
+    if (badges) {
+      const badgeClass = video.category === 'REACTION' ? 'badge-secondary' : 'badge-primary';
+      badges.innerHTML = `
+        <span class="badge ${badgeClass}">${video.category}</span>
+        <span class="badge badge-outline">${video.upload_date}</span>
       `;
     }
   } catch (error) {
@@ -114,33 +91,111 @@ async function loadFeaturedVideo() {
 
 async function loadVideos() {
   try {
-    const data = await request('/videos?limit=3');
-    const firstGrid = document.querySelector('.section:first-of-type .video-grid');
-    if (firstGrid) {
-      firstGrid.innerHTML = data.videos.map(createVideoCard).join('');
+    const data = await request('/videos?limit=6');
+    const videos = data.videos || [];
+    
+    const trendingGrid = document.getElementById('trending-grid');
+    if (trendingGrid && videos.length > 0) {
+      trendingGrid.innerHTML = videos.slice(0, 3).map(createVideoCard).join('');
     }
 
-    const secondGrid = document.querySelector('.section:nth-of-type(2) .video-grid');
-    if (secondGrid) {
-      secondGrid.innerHTML = data.videos.map(createVideoCard).join('');
+    const showsGrid = document.getElementById('shows-grid');
+    if (showsGrid && videos.length > 0) {
+      const showsHtml = videos.slice(0, 5).map(createVideoCard).join('') + 
+      `<a href="https://www.youtube.com/@VidaBrownOfficial" target="_blank" class="glass-card video-card subscribe-card">
+          <div class="subscribe-icon"><span class="material-symbols-outlined">subscriptions</span></div>
+          <h4>Subscribe to Channel</h4>
+          <p>Get the latest music reviews and reactions</p>
+          <span class="view-all" style="justify-content:center;">VIEW CHANNEL <span class="material-symbols-outlined">arrow_forward</span></span>
+        </a>`;
+      showsGrid.innerHTML = showsHtml;
     }
   } catch (error) {
     console.warn('Videos unavailable', error);
   }
 }
 
+async function loadTracks() {
+  try {
+    const data = await request('/music/tracks?limit=10');
+    const trackList = document.getElementById('track-list');
+    
+    if (trackList && data.tracks) {
+      trackList.innerHTML = data.tracks.map((track) => {
+        const trackNum = String(track.track_number).padStart(2, '0');
+        const artistDisplay = track.featured_artist ? `${track.artist_name} feat. ${track.featured_artist}` : track.artist_name;
+        const yearDisplay = track.year ? ` • ${track.year}` : '';
+        
+        return `
+          <div class="track-item" data-track-id="${track.id}">
+            <div class="track-info">
+              <span class="track-num">${trackNum}</span>
+              <div>
+                <div class="track-title">${track.title}</div>
+                <div class="track-artist">${artistDisplay}${yearDisplay}</div>
+              </div>
+            </div>
+            <div class="track-meta">
+              <span>${track.streams_display} streams</span>
+              <span>${track.track_type}</span>
+              <button class="track-more" data-track-id="${track.id}"><span class="material-symbols-outlined">more_horiz</span></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (error) {
+    console.warn('Tracks unavailable', error);
+  }
+}
+
 async function loadGallery() {
   try {
     const images = await request('/gallery');
-    const galleryGrid = document.querySelector('#gallery-grid');
-    if (galleryGrid) {
-      galleryGrid.innerHTML = images.map((img) => `<div class="item"><img src="${img.url}" alt="${img.alt_text}" loading="lazy"></div>`).join('');
+    const galleryGrid = document.getElementById('gallery-grid');
+    if (galleryGrid && images) {
+      galleryGrid.innerHTML = images.map((img) => 
+        `<div class="item"><img src="${img.url}" alt="${img.alt_text}" loading="lazy"></div>`
+      ).join('');
     }
   } catch (error) {
     console.warn('Gallery unavailable', error);
   }
 }
 
+function initNewsletter() {
+  const form = document.getElementById('newsletter-form');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('newsletter-email');
+    const submitBtn = document.getElementById('subscribe-btn');
+    const email = emailInput.value;
+
+    if (!email) return;
+
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Subscribing...';
+    submitBtn.disabled = true;
+
+    try {
+      await request('/newsletter/subscribe', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      alert('Successfully subscribed to the newsletter! 🎉');
+      emailInput.value = '';
+    } catch (error) {
+      alert(error.message || 'Failed to subscribe. Please try again.');
+    } finally {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+}
+
+// --- UI Effects ---
 function initThemeToggle() {
   const toggle = document.getElementById('themeToggle');
   const icon = document.getElementById('themeIcon');
@@ -178,98 +233,15 @@ function initHeroMotion() {
   });
 }
 
+// --- Initialization ---
 async function initializePipeline() {
   await Promise.allSettled([
     loadArtistProfile(),
     loadFeaturedVideo(),
     loadVideos(),
+    loadTracks(),
     loadGallery(),
   ]);
-  initAdminPanel();
-}
-
-function initAdminPanel() {
-  const loginBtn = document.getElementById('admin-login-btn');
-  const logoutBtn = document.getElementById('admin-logout-btn');
-  const tokenInput = document.getElementById('admin-token-input');
-  const adminPanel = document.getElementById('admin-panel');
-  const adminStats = document.getElementById('admin-stats');
-  const adminWelcome = document.getElementById('admin-welcome');
-  const adminCreate = document.getElementById('admin-create-forms');
-
-  const currentToken = getAdminToken();
-  if (currentToken) {
-    adminPanel.style.display = '';
-    adminStats.style.display = '';
-    adminCreate.style.display = '';
-    document.getElementById('admin-login').style.display = 'none';
-    logoutBtn.style.display = '';
-    adminWelcome.textContent = 'Logged in (token stored)';
-    fetchAdminStats();
-  }
-
-  loginBtn?.addEventListener('click', async () => {
-    const token = tokenInput.value.trim();
-    if (!token) return alert('Enter admin token');
-    setAdminToken(token);
-    try {
-      await fetchAdminStats();
-      adminPanel.style.display = '';
-      adminStats.style.display = '';
-      adminCreate.style.display = '';
-      document.getElementById('admin-login').style.display = 'none';
-      logoutBtn.style.display = '';
-      adminWelcome.textContent = 'Logged in as admin';
-      tokenInput.value = '';
-    } catch (err) {
-      setAdminToken(null);
-      alert('Login failed: ' + err.message);
-    }
-  });
-
-  logoutBtn?.addEventListener('click', () => {
-    setAdminToken(null);
-    adminPanel.style.display = 'none';
-    document.getElementById('admin-login').style.display = '';
-    logoutBtn.style.display = 'none';
-    adminWelcome.textContent = 'Not logged in';
-  });
-
-  const createVideoBtn = document.getElementById('create-video-btn');
-  createVideoBtn?.addEventListener('click', async () => {
-    const payload = {
-      title: document.getElementById('new-video-title').value,
-      youtube_id: document.getElementById('new-video-youtube_id').value,
-      embed_url: document.getElementById('new-video-embed').value,
-      category: document.getElementById('new-video-category').value,
-      duration: document.getElementById('new-video-duration').value,
-      upload_date: document.getElementById('new-video-upload').value,
-      description: document.getElementById('new-video-desc').value,
-    };
-    try {
-      const res = await authRequest('/admin/videos', { method: 'POST', body: JSON.stringify(payload) });
-      alert('Video created: ' + res.title);
-      fetchAdminStats();
-    } catch (err) {
-      alert('Create failed: ' + err.message);
-    }
-  });
-}
-
-async function fetchAdminStats() {
-  try {
-    const v = await request('/videos?limit=1');
-    const t = await request('/music/tracks?limit=1');
-    const g = await request('/gallery');
-    const a = await request('/artist/profile');
-    document.getElementById('stat-videos').textContent = v.total || (v.videos ? v.videos.length : 0);
-    document.getElementById('stat-tracks').textContent = t.total || (t.tracks ? t.tracks.length : 0);
-    document.getElementById('stat-gallery').textContent = Array.isArray(g) ? g.length : 0;
-    document.getElementById('stat-followers').textContent = a.followers || 0;
-  } catch (err) {
-    console.warn('Failed to fetch admin stats', err);
-    throw err;
-  }
 }
 
 if (document.readyState === 'loading') {
@@ -277,13 +249,16 @@ if (document.readyState === 'loading') {
     initThemeToggle();
     initHeaderEffects();
     initHeroMotion();
+    initNewsletter();
     initializePipeline();
   });
 } else {
   initThemeToggle();
   initHeaderEffects();
   initHeroMotion();
+  initNewsletter();
   initializePipeline();
 }
 
+// Expose for potential external use
 window.VidaBrown = { request };
