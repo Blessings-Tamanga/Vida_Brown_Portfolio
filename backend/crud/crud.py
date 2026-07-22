@@ -69,7 +69,7 @@ def get_videos(db: Session, skip: int = 0, limit: int = 100, category: Optional[
         query = query.filter(models.Video.category == category)
     return query.order_by(models.Video.created_at.desc()).offset(skip).limit(limit).all()
 
-# FIXED: Added missing function required by routes.py
+
 def get_video_by_id(db: Session, video_id: int):
     return db.query(models.Video).filter(models.Video.id == video_id).first()
 
