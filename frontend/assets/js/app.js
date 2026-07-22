@@ -1,4 +1,7 @@
-const API_BASE = 'http://localhost:8000/api';
+// --- API Configuration ---
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000/api'
+    : 'https://vida-brown-portfolio-api.onrender.com/api'; // <-- Make sure this matches your exact Render backend URL
 
 // --- Helper Functions ---
 function setText(selector, value) {
@@ -8,6 +11,7 @@ function setText(selector, value) {
   }
 }
 
+// --- API Request Function ---
 async function request(endpoint, options = {}) {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
