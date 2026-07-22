@@ -1,12 +1,9 @@
 import os
 import requests
 from datetime import datetime, timedelta
-from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 import logging
 
 from database.database import Base, SessionLocal, engine
@@ -17,49 +14,32 @@ load_dotenv()
 
 app = FastAPI(
     title="Vida Brown API",
-    description="Backend for the Vida Brown portfolio and admin dashboard",
+    description="Backend API for the Vida Brown portfolio and admin dashboard",
     version="1.0.0",
+    docs_url="/docs",  # This is where your endpoints will be viewed
+    redoc_url="/redoc"
 )
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("vidabrown")
 
-# FIXED: Cannot use allow_credentials=True with allow_origins=["*"]
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Change to your specific Vercel/Render URL in production
+    allow_origins=["*"], # Change to your Vercel/Netlify URL in production
     allow_credentials=False, 
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Include all API routes
 app.include_router(router)
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_DIR = ROOT_DIR / "frontend"
-
-# Mount static files safely
-if (FRONTEND_DIR / "assets").exists():
-    app.mount("/assets", StaticFiles(directory=FRONTEND_DIR / "assets"), name="assets")
-
-# FIXED: Added missing cache functions to prevent NameError
-_cache: dict[str, tuple[object, datetime]] = {}
-
-def get_cached(key: str):
-    if key in _cache:
-        data, timestamp = _cache[key]
-        if datetime.now() - timestamp < timedelta(seconds=300):
-            return data
-    return None
-
-def set_cache(key: str, value: object):
-    _cache[key] = (value, datetime.now())
-
+# --- Database Initialization ---
 def seed_database() -> None:
     db = SessionLocal()
     try:
-        # 🛡️ SELF-HEALING FIX: Detect and wipe old broken string data ("10.7K", "12.4K")
-        # This ensures Render deployments don't crash on existing bad data
+        # Self-healing: Wipe old string data if it exists
         bad_video = db.query(models.Video).filter(models.Video.views == "10.7K").first()
         bad_track = db.query(models.Track).filter(models.Track.streams == "12.4K").first()
         
@@ -104,7 +84,7 @@ def seed_database() -> None:
         logger.info("✅ Database seeded successfully with clean integer data.")
     except Exception as e:
         db.rollback()
-        logger.warning(f"Seeding skipped or failed (data may already exist): {e}")
+        logger.warning(f"Seeding skipped or failed: {e}")
     finally:
         db.close()
 
@@ -112,62 +92,17 @@ def initialize_database() -> None:
     Base.metadata.create_all(bind=engine)
     seed_database()
 
-# FIXED: Only called once on startup
 @app.on_event("startup")
 def startup_event() -> None:
     initialize_database()
 
+@app.get("/")
+def root():
+    return {"message": "Welcome to the Vida Brown API. Visit /docs to view all endpoints."}
+
 @app.get("/health")
 def health_check() -> dict:
     return {"status": "ok"}
-
-# FIXED: Use FileResponse instead of read_text() for proper HTML serving
-@app.get("/")
-def serve_index() -> FileResponse:
-    return FileResponse(FRONTEND_DIR / "index.html")
-
-@app.get("/admin")
-def serve_admin() -> FileResponse:
-    return FileResponse(FRONTEND_DIR / "admin.html")
-
-@app.get("/api/spotify/tracks")
-async def get_spotify_tracks(limit: int = Query(20, ge=1, le=50), offset: int = Query(0, ge=0)):
-    cache_key = f"spotify_tracks_{limit}_{offset}"
-    cached = get_cached(cache_key)
-    if cached:
-        return cached
-
-    artist_id = os.getenv("SPOTIFY_ARTIST_ID", "3ihbWDeubJO4XmeZlCGqZL")
-    token = os.getenv("SPOTIFY_ACCESS_TOKEN", "") 
-    
-    try:
-        response = requests.get(
-            f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks", 
-            params={"market": "US"}, 
-            headers={"Authorization": f"Bearer {token}"}, 
-            timeout=10
-        )
-        if response.status_code != 200:
-            raise HTTPException(status_code=500, detail="Failed to fetch tracks from Spotify")
-        data = response.json()
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail="Failed to fetch tracks") from exc
-
-    tracks = [
-        {
-            "id": track["id"], 
-            "trackNumber": idx, 
-            "title": track["name"], 
-            "artist": track["artists"][0]["name"], 
-            "album": track["album"]["name"], 
-            "popularity": track["popularity"]
-        } 
-        for idx, track in enumerate(data.get("tracks", [])[offset: offset + limit], start=1)
-    ]
-    
-    result = {"tracks": tracks, "total": len(tracks)}
-    set_cache(cache_key, result)
-    return result
 
 if __name__ == "__main__":
     import uvicorn
