@@ -43,7 +43,6 @@ cache: dict[str, tuple[object, datetime]] = {}
 
 CACHE_DURATION_SECONDS = 300
 
-
 def seed_database() -> None:
     db = SessionLocal()
     try:
@@ -66,8 +65,8 @@ def seed_database() -> None:
                         youtube_id="nWA4D9U-q48",
                         embed_url="https://www.youtube.com/embed/nWA4D9U-q48",
                         category="HIT OR MISS",
-                        views="10.7K",
-                        likes="330",
+                        views=10700,          # FIXED: Integer instead of "10.7K"
+                        likes=330,            # FIXED: Integer instead of "330"
                         duration="5:26",
                         upload_date="Mar 2026",
                         description="VIDEO REVIEW | HIT OR MISS - Breaking down the latest banger from Diamond Platnumz.",
@@ -78,8 +77,8 @@ def seed_database() -> None:
                         youtube_id="JqEXp4EJjlw",
                         embed_url="https://www.youtube.com/embed/JqEXp4EJjlw",
                         category="HIT OR MISS",
-                        views="210",
-                        likes="48",
+                        views=210,            # FIXED: Integer
+                        likes=48,             # FIXED: Integer
                         duration="5:06",
                         upload_date="Feb 2026",
                         description="Reviewing the collaboration between two Nigerian powerhouses.",
@@ -89,8 +88,8 @@ def seed_database() -> None:
                         youtube_id="UujBzYu6z0E",
                         embed_url="https://www.youtube.com/embed/UujBzYu6z0E",
                         category="REACTION",
-                        views="4.6K",
-                        likes="92",
+                        views=4600,           # FIXED: Integer instead of "4.6K"
+                        likes=92,             # FIXED: Integer
                         duration="5:03",
                         upload_date="Feb 2025",
                         description="A fresh reaction to Ayra Starr's latest release.",
@@ -107,7 +106,7 @@ def seed_database() -> None:
                         artist_name="Vida Brown",
                         featured_artist=None,
                         year="2024",
-                        streams="12.4K",
+                        streams=12400,        # FIXED: Integer instead of "12.4K"
                         track_type="Single",
                         artist_id=artist.id,
                     ),
@@ -117,7 +116,7 @@ def seed_database() -> None:
                         artist_name="Vida Brown",
                         featured_artist=None,
                         year="2025",
-                        streams="8.2K",
+                        streams=8200,         # FIXED: Integer instead of "8.2K"
                         track_type="Single",
                         artist_id=artist.id,
                     ),
@@ -159,7 +158,6 @@ def seed_database() -> None:
         db.commit()
     finally:
         db.close()
-
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
