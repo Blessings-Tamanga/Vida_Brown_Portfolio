@@ -122,7 +122,13 @@ async def subscribe_newsletter(
     crud.create_subscriber(db, subscription.email)
     return {"message": "Successfully subscribed to newsletter!"}
 
+
 # --- Admin Routes (Content Management) ---
+
+@router.get("/admin/me")
+async def get_admin_info(admin: bool = Depends(admin_required)):
+    """Verify the admin token is actually valid"""
+    return {"status": "authenticated", "role": "admin"}
 
 @router.post("/admin/login")
 async def admin_login(payload: AdminLogin):
