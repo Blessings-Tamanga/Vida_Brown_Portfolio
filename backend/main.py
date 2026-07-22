@@ -3,7 +3,7 @@ import requests
 from datetime import datetime, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -44,6 +44,7 @@ if (FRONTEND_DIR / "assets").exists():
 
 # FIXED: Added missing cache functions to prevent NameError
 _cache: dict[str, tuple[object, datetime]] = {}
+
 def get_cached(key: str):
     if key in _cache:
         data, timestamp = _cache[key]
@@ -57,10 +58,24 @@ def set_cache(key: str, value: object):
 def seed_database() -> None:
     db = SessionLocal()
     try:
+        # 🛡️ SELF-HEALING FIX: Detect and wipe old broken string data ("10.7K", "12.4K")
+        # This ensures Render deployments don't crash on existing bad data
+        bad_video = db.query(models.Video).filter(models.Video.views == "10.7K").first()
+        bad_track = db.query(models.Track).filter(models.Track.streams == "12.4K").first()
+        
+        if bad_video or bad_track:
+            logger.warning("⚠️ Detected old string-based seed data. Wiping and reseeding with integers...")
+            db.query(models.Video).delete()
+            db.query(models.Track).delete()
+            db.query(models.GalleryImage).delete()
+            db.query(models.Artist).delete()
+            db.commit()
+
         artist = db.query(models.Artist).first()
         if not artist:
             artist = models.Artist(
-                name="Vida Brown", title="Singer • Songwriter • Producer",
+                name="Vida Brown", 
+                title="Singer • Songwriter • Producer",
                 bio="Born Vida Ezra Gérmaño, known as Vida (Veeda) - a Malawian artist creating music, arts, and culture content.",
                 followers=82,
             )
@@ -86,9 +101,10 @@ def seed_database() -> None:
                 models.GalleryImage(url="https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=900", alt_text="Studio session", order=2),
             ])
         db.commit()
+        logger.info("✅ Database seeded successfully with clean integer data.")
     except Exception as e:
         db.rollback()
-        logger.warning(f"Seeding skipped (data may already exist): {e}")
+        logger.warning(f"Seeding skipped or failed (data may already exist): {e}")
     finally:
         db.close()
 
@@ -96,7 +112,7 @@ def initialize_database() -> None:
     Base.metadata.create_all(bind=engine)
     seed_database()
 
-# FIXED: Removed manual initialize_database() call at the bottom to prevent double execution
+# FIXED: Only called once on startup
 @app.on_event("startup")
 def startup_event() -> None:
     initialize_database()
@@ -122,18 +138,32 @@ async def get_spotify_tracks(limit: int = Query(20, ge=1, le=50), offset: int = 
         return cached
 
     artist_id = os.getenv("SPOTIFY_ARTIST_ID", "3ihbWDeubJO4XmeZlCGqZL")
-    # Note: You must add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to Render env vars to get a real token
     token = os.getenv("SPOTIFY_ACCESS_TOKEN", "") 
     
     try:
-        response = requests.get(f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks", params={"market": "US"}, headers={"Authorization": f"Bearer {token}"}, timeout=10)
+        response = requests.get(
+            f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks", 
+            params={"market": "US"}, 
+            headers={"Authorization": f"Bearer {token}"}, 
+            timeout=10
+        )
         if response.status_code != 200:
             raise HTTPException(status_code=500, detail="Failed to fetch tracks from Spotify")
         data = response.json()
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Failed to fetch tracks") from exc
 
-    tracks = [{"id": track["id"], "trackNumber": idx, "title": track["name"], "artist": track["artists"][0]["name"], "album": track["album"]["name"], "popularity": track["popularity"]} for idx, track in enumerate(data.get("tracks", [])[offset: offset + limit], start=1)]
+    tracks = [
+        {
+            "id": track["id"], 
+            "trackNumber": idx, 
+            "title": track["name"], 
+            "artist": track["artists"][0]["name"], 
+            "album": track["album"]["name"], 
+            "popularity": track["popularity"]
+        } 
+        for idx, track in enumerate(data.get("tracks", [])[offset: offset + limit], start=1)
+    ]
     
     result = {"tracks": tracks, "total": len(tracks)}
     set_cache(cache_key, result)
